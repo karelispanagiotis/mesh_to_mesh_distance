@@ -48,5 +48,5 @@ function segment_to_segment_dist2(A::Point, B::Point, C::Point, D::Point)
     end
 
     DD = t*d₁ - u*d₂ - d₁₂
-    return dot(DD, DD)
+    return DD⋅DD
 end
