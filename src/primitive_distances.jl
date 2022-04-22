@@ -116,4 +116,98 @@ function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
     return ret
 end
 
+#-------------------------------------------------------------------
+# The same functions as above, but instead of distance, return 
+# the endpoints of minimum distance between the primitives
+#-------------------------------------------------------------------
 
+function segment_to_segment_endpoints(AB::Segment, CD::Segment)
+    A, B = vertices(AB)
+    C, D = vertices(CD)
+
+    d₁  = B - A
+    d₂  = D - C
+    d₁₂ = C - A 
+ 
+    D₁ = d₁⋅d₁   
+    D₂ = d₂⋅d₂
+    R  = d₁⋅d₂
+
+    S₁ = d₁⋅d₁₂
+    S₂ = d₂⋅d₁₂
+    
+    if D₁≈0 && D₂≈0
+        t = u = 0.0f0      
+    elseif D₁≈0
+        t = 0.0f
+        u = clamp(-S₂/D₂, 0, 1)
+    elseif D₂≈0
+        u = 0.0f0
+        t = clamp( S₁/D₁, 0, 1)
+    elseif D₁*D₂ - R^2 ≈ 0.0
+        t = 0.0f0
+        u = -S₂/D₂
+        if u<0 || u>1
+            u = clamp(u, 0, 1)
+            t = clamp((u*R+S₁)/D₁, 0, 1)
+        end
+    else
+        t = clamp((S₁*D₂ - S₂*R)/(D₁*D₂ - R^2), 0, 1)
+        u = (t*R - S₂)/D₂
+        if u<0 || u>1
+            u = clamp(u, 0, 1)
+            t = clamp((u*R+S₁)/D₁, 0, 1)
+        end
+    end
+
+    return Segment(AB(t), CD(u))
+end
+
+function vectices_to_triangle_endpoints(verts, T::Triangle)
+    P₁, P₂, P₃ = vertices(T)
+
+    u = P₂ - P₁
+    v = P₃ - P₁
+    n  = u × v
+    n² = n ⋅ n
+
+    endpoints = Segment(Point(-Inf32, -Inf32, -Inf32), Point(+Inf32, +Inf32, +Inf32))
+    for P ∈ verts
+        w = P - P₁
+
+        #Compute Barycentric Coordinates of Projected Point
+        γ = ( (u × w)⋅n )/n²  
+        β = ( (w × v)⋅n )/n²
+        α = 1 - γ - β
+
+        if 0≤α≤1 && 0≤β≤1 && 0≤γ≤1 && (n⋅w)^2 / n² < measure(endpoints)
+            endpoints = Segment(P, P - n * (n⋅w))
+        end
+    end
+
+    return endpoints
+end
+
+function triangle_to_triangle_endpoints(T1::Triangle, T2::Triangle)
+    endpoints = Segment(Point(+Inf32, +Inf32, +Inf32), Point(-Inf32, -Inf32, -Inf32))
+    for seg₁ ∈ segments(chains(T1)[1])
+        for seg₂ ∈ segments(chains(T2)[1])
+            tmp = segment_to_segment_endpoints(seg₁, seg₂)
+            if measure(tmp) < measure(endpoints) 
+                endpoints = tmp
+            end
+        end
+    end
+    
+    tmp = vectices_to_triangle_endpoints(vertices(T1), T2)
+    if measure(tmp) < measure(endpoints) 
+        endpoints = tmp
+    end
+
+    tmp = vectices_to_triangle_endpoints(vertices(T2), T1)
+    if measure(tmp) < measure(endpoints) 
+        endpoints = tmp
+    end
+
+    return endpoints
+end
