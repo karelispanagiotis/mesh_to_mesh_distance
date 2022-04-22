@@ -1,6 +1,6 @@
 using Meshes, LinearAlgebra
 
-#--------------------------------------------------------------
+#-------------------------------------------------------------------
 # segment_to_segment_dist2()
 #
 # Returns the squared distance between a pair of segments.
@@ -10,8 +10,11 @@ using Meshes, LinearAlgebra
 # Vladimir J. Lumesky
 # On fast computation of distance between line segments.
 # In Information Processing Letters, no. 21, pages 55-61, 1985
-#--------------------------------------------------------------
-function segment_to_segment_dist2(A::Point, B::Point, C::Point, D::Point)
+#-------------------------------------------------------------------
+function segment_to_segment_dist2(AB::Segment, CD::Segment)
+    A, B = vertices(AB)
+    C, D = vertices(CD)
+
     d₁  = B - A
     d₂  = D - C
     d₁₂ = C - A 
@@ -50,3 +53,67 @@ function segment_to_segment_dist2(A::Point, B::Point, C::Point, D::Point)
     DD = t*d₁ - u*d₂ - d₁₂
     return DD⋅DD
 end
+
+#-------------------------------------------------------------------
+# vectices_to_triangle_check()
+#
+# Checks if the projection of P ∈ verts on the plane defined by
+# triangle T, lies within T. If this is the case, the distance of 
+# P to triangle T is equal to the distance of P to the plane itself.
+# 
+# The algorithm that checks if a projection of a point lies within
+# the triangle T, is described in:
+#
+# Wolfgang Heidrich
+# Computing the Barycentric Coordinates of a Projected Point
+# In Journal of Graphics Tools, pages 9-12, 2005
+#-------------------------------------------------------------------
+function vectices_to_triangle_check(verts, T::Triangle)
+    P₁, P₂, P₃ = vertices(T)
+
+    u = P₂ - P₁
+    v = P₃ - P₁
+    n  = u × v
+    n² = n ⋅ n
+
+    ret = Inf32
+    for P ∈ verts
+        w = P - P₁
+
+        #Compute Barycentric Coordinates of Projected Point
+        γ = ( (u × w)⋅n )/n²  
+        β = ( (w × v)⋅n )/n²
+        α = 1 - γ - β
+
+        if 0≤α≤1 && 0≤β≤1 && 0≤γ≤1
+            ret = min(ret, ((n⋅w)*(n⋅w))/n²)
+        end
+    end
+
+    return ret
+end
+
+#-------------------------------------------------------------------
+# triangle_to_triangle_dist2()
+#
+# Returns the squared distance of two triangles
+# 
+# Checks all possible scenarios for the minimum distance:
+#   * The minimum distance is between two edges or
+#   * The minimum distance is between a vertex and a face or
+#   * The minimum distance is zero, because the triangles intersect
+#-------------------------------------------------------------------
+function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
+    ret = Inf32
+    for seg₁ ∈ segments(chains(T1)[1])
+        for seg₂ ∈ segments(chains(T2)[1])
+            ret = min(ret, segment_to_segment_dist2(seg₁, seg₂))
+        end
+    end
+    
+    ret = min(ret, vectices_to_triangle_check(vertices(T1), T2))
+    ret = min(ret, vectices_to_triangle_check(vertices(T2), T1))
+    return ret
+end
+
+
