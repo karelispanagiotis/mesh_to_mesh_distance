@@ -5,7 +5,8 @@ using Meshes, LinearAlgebra
 #
 # Returns the squared distance between a pair of segments.
 # 
-# The algorithm is described in:
+# The implementation follows the notation used in 
+# an algorithm described in:
 #
 # Vladimir J. Lumesky
 # On fast computation of distance between line segments.
@@ -76,7 +77,7 @@ function vectices_to_triangle_check(verts, T::Triangle)
     n  = u × v
     n² = n ⋅ n
 
-    ret = Inf32
+    dist² = Inf32
     for P ∈ verts
         w = P - P₁
 
@@ -86,11 +87,11 @@ function vectices_to_triangle_check(verts, T::Triangle)
         α = 1 - γ - β
 
         if 0≤α≤1 && 0≤β≤1 && 0≤γ≤1
-            ret = min(ret, ((n⋅w)*(n⋅w))/n²)
+            dist² = min(dist², (n⋅w)^2/n²)
         end
     end
 
-    return ret
+    return dist²
 end
 
 #-------------------------------------------------------------------
@@ -104,16 +105,16 @@ end
 #   * The minimum distance is zero, because the triangles intersect
 #-------------------------------------------------------------------
 function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
-    ret = Inf32
+    dist² = Inf32
     for seg₁ ∈ segments(chains(T1)[1])
         for seg₂ ∈ segments(chains(T2)[1])
-            ret = min(ret, segment_to_segment_dist2(seg₁, seg₂))
+            ret = min(dist², segment_to_segment_dist2(seg₁, seg₂))
         end
     end
     
-    ret = min(ret, vectices_to_triangle_check(vertices(T1), T2))
-    ret = min(ret, vectices_to_triangle_check(vertices(T2), T1))
-    return ret
+    dist² = min(dist², vectices_to_triangle_check(vertices(T1), T2))
+    dist² = min(dist², vectices_to_triangle_check(vertices(T2), T1))
+    return dist²
 end
 
 #-------------------------------------------------------------------
