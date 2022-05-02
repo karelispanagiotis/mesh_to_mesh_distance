@@ -1,4 +1,4 @@
-using Meshes : SimpleMesh
+using Meshes
 using PlyIO: load_ply
 
 function load_meshes(fname)
