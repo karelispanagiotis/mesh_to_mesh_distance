@@ -108,7 +108,7 @@ function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
     dist² = Inf32
     for seg₁ ∈ segments(chains(T1)[1])
         for seg₂ ∈ segments(chains(T2)[1])
-            ret = min(dist², segment_to_segment_dist2(seg₁, seg₂))
+            dist² = min(dist², segment_to_segment_dist2(seg₁, seg₂))
         end
     end
     
@@ -190,7 +190,7 @@ function vectices_to_triangle_endpoints(verts, T::Triangle)
 end
 
 function triangle_to_triangle_endpoints(T1::Triangle, T2::Triangle)
-    endpoints = Segment(Point(+Inf32, +Inf32, +Inf32), Point(-Inf32, -Inf32, -Inf32))
+    endpoints = Segment(Point3f(+Inf32, +Inf32, +Inf32), Point3f(-Inf32, -Inf32, -Inf32))
     for seg₁ ∈ segments(chains(T1)[1])
         for seg₂ ∈ segments(chains(T2)[1])
             tmp = segment_to_segment_endpoints(seg₁, seg₂)
