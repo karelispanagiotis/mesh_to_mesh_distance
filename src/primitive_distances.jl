@@ -27,10 +27,11 @@ function segment_to_segment_dist2(AB::Segment, CD::Segment)
     S₁ = d₁⋅d₁₂
     S₂ = d₂⋅d₁₂
     
+
     if D₁≈0 && D₂≈0
         t = u = 0.0f0      
     elseif D₁≈0
-        t = 0.0f
+        t = 0.0f0
         u = clamp(-S₂/D₂, 0, 1)
     elseif D₂≈0
         u = 0.0f0
