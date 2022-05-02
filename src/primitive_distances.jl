@@ -106,9 +106,14 @@ end
 #   * The minimum distance is zero, because the triangles intersect
 #-------------------------------------------------------------------
 function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
+    A, B, C = vertices(T1)
+    X, Y, Z = vertices(T2)
+    edges1 = (Segment(A,B), Segment(B,C), Segment(C,A))
+    edges2 = (Segment(X,Y), Segment(Y,Z), Segment(Z,X))
+    
     dist² = Inf32
-    for seg₁ ∈ segments(chains(T1)[1])
-        for seg₂ ∈ segments(chains(T2)[1])
+    for seg₁ ∈ edges1
+        for seg₂ ∈ edges2
             dist² = min(dist², segment_to_segment_dist2(seg₁, seg₂))
         end
     end
