@@ -1,6 +1,7 @@
 module PrimitiveDistances
 
-export distance²
+export distance²,
+       distance_endpoints 
 
 using Meshes, LinearAlgebra
 
@@ -143,7 +144,7 @@ end
 # the endpoints of minimum distance between the primitives
 #-------------------------------------------------------------------
 
-function segment_to_segment_endpoints(AB::Segment, CD::Segment)
+function distance_endpoints(AB::Segment, CD::Segment)
     A, B = vertices(AB)
     C, D = vertices(CD)
 
@@ -210,7 +211,7 @@ function vectices_to_triangle_endpoints(verts, T::Triangle)
     return endpoints
 end
 
-function triangle_to_triangle_endpoints(T1::Triangle, T2::Triangle)
+function distance_endpoints(T1::Triangle, T2::Triangle)
     endpoints = Segment(Point3f(+Inf32, +Inf32, +Inf32), Point3f(-Inf32, -Inf32, -Inf32))
     for seg₁ ∈ segments(chains(T1)[1])
         for seg₂ ∈ segments(chains(T2)[1])
