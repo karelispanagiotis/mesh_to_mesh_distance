@@ -1,7 +1,11 @@
+module PrimitiveDistances
+
+export distance²
+
 using Meshes, LinearAlgebra
 
 #-------------------------------------------------------------------
-# segment_to_segment_dist2()
+# Segment to Segment distance²
 #
 # Returns the squared distance between a pair of segments.
 # 
@@ -12,7 +16,7 @@ using Meshes, LinearAlgebra
 # On fast computation of distance between line segments.
 # In Information Processing Letters, no. 21, pages 55-61, 1985
 #-------------------------------------------------------------------
-function segment_to_segment_dist2(AB::Segment, CD::Segment)
+function distance²(AB::Segment, CD::Segment)
     A, B = vertices(AB)
     C, D = vertices(CD)
 
@@ -96,7 +100,7 @@ function vectices_to_triangle_check(verts, T::Triangle)
 end
 
 #-------------------------------------------------------------------
-# triangle_to_triangle_dist2()
+# Triangle to Triangle distance²()
 #
 # Returns the squared distance of two triangles
 # 
@@ -105,7 +109,7 @@ end
 #   * The minimum distance is between a vertex and a face or
 #   * The minimum distance is zero, because the triangles intersect
 #-------------------------------------------------------------------
-function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
+function distance²(T1::Triangle, T2::Triangle)
     A, B, C = vertices(T1)
     X, Y, Z = vertices(T2)
     edges1 = (Segment(A,B), Segment(B,C), Segment(C,A))
@@ -114,13 +118,24 @@ function triangle_to_triangle_dist2(T1::Triangle, T2::Triangle)
     dist² = Inf32
     for seg₁ ∈ edges1
         for seg₂ ∈ edges2
-            dist² = min(dist², segment_to_segment_dist2(seg₁, seg₂))
+            dist² = min(dist², distance²(seg₁, seg₂))
         end
     end
     
     dist² = min(dist², vectices_to_triangle_check(vertices(T1), T2))
     dist² = min(dist², vectices_to_triangle_check(vertices(T2), T1))
     return dist²
+end
+
+#-------------------------------------------------------------------
+# AABB to AABB distance²()
+#
+# Returns the squared distance of two Axis-Aligned Bounding Boxes 
+#-------------------------------------------------------------------
+function distance²(B1::Box, B2::Box)
+    v = max.(minimum(B1) - maximum(B2), 0)
+    w = max.(minimum(B2) - maximum(B1), 0)
+    return v⋅v + w⋅w 
 end
 
 #-------------------------------------------------------------------
@@ -146,7 +161,7 @@ function segment_to_segment_endpoints(AB::Segment, CD::Segment)
     if D₁≈0 && D₂≈0
         t = u = 0.0f0      
     elseif D₁≈0
-        t = 0.0f
+        t = 0.0f0
         u = clamp(-S₂/D₂, 0, 1)
     elseif D₂≈0
         u = 0.0f0
@@ -217,4 +232,6 @@ function triangle_to_triangle_endpoints(T1::Triangle, T2::Triangle)
     end
 
     return endpoints
+end
+
 end
