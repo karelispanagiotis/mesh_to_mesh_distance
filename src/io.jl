@@ -1,3 +1,7 @@
+module PlyMeshIO
+
+export load_meshes
+
 using Meshes
 using PlyIO: load_ply
 
@@ -14,4 +18,6 @@ function load_meshes(fname)
   connec1 = [connect(Tuple(c.+1)) for c in ply["face"]["vertex_indices"][indices1]]
   connec2 = [connect(Tuple(c.+1)) for c in ply["face"]["vertex_indices"][indices2]]
   SimpleMesh(points, connec1), SimpleMesh(points, connec2)
+end
+
 end
