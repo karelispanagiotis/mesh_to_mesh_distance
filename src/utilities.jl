@@ -6,6 +6,7 @@ using Base.Sort, Base.Order
 
 function select!(v::AbstractVector, lo::Integer, hi::Integer, k::Integer, o::Ordering)
     @inbounds while lo < hi
+        # range must be ≥ 3 to apply partitioning, hande range==2 seperately
         if hi-lo == 1
             if lt(o, v[hi], v[lo])
                 v[lo], v[hi] = v[hi], v[lo]
@@ -13,8 +14,8 @@ function select!(v::AbstractVector, lo::Integer, hi::Integer, k::Integer, o::Ord
             return v[lo]
         end
 
-        # range must be ≥ 3 to apply partitioning
         j = Base.Sort.partition!(v, lo, hi, o)
+
         if k < j
             hi = j - 1
         elseif k > j
