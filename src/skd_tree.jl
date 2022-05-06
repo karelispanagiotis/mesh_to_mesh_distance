@@ -6,8 +6,8 @@ include("utilities.jl")
 using Meshes
 using .Utilities
 
-struct sKDTree{Dim,T}
-    data::Vector{<:Geometry{Dim,T}}
+struct sKDTree{V, Dim, T}
+    data::Vector{V}
     nodes::Vector{Box{Dim,T}}
     indices::Vector{Int}
     leaf_size::Int
