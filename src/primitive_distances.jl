@@ -215,7 +215,7 @@ function distance_endpoints(T1::Triangle, T2::Triangle)
     endpoints = Segment(Point3f(+Inf32, +Inf32, +Inf32), Point3f(-Inf32, -Inf32, -Inf32))
     for seg₁ ∈ segments(chains(T1)[1])
         for seg₂ ∈ segments(chains(T2)[1])
-            tmp = segment_to_segment_endpoints(seg₁, seg₂)
+            tmp = distance_endpoints(seg₁, seg₂)
             if measure(tmp) < measure(endpoints) 
                 endpoints = tmp
             end
