@@ -1,7 +1,9 @@
 module Utilities
 
-export select!
+export select!,
+       combine_boxes
 
+using Meshes
 using Base.Sort, Base.Order
 
 function select!(v::AbstractVector, lo::Integer, hi::Integer, k::Integer, o::Ordering)
@@ -36,6 +38,12 @@ function select!(v::AbstractVector,
                  rev::Union{Bool,Nothing}=nothing,
                  order::Ordering=Forward)
     select!(v, lo, hi, k, ord(lt, by, rev, order))
+end
+
+function combine_boxes(B1::Box, B2::Box)
+    S = Point(min.(coordinates(B1.min), coordinates(B2.min)))
+    T = Point(max.(coordinates(B1.max), coordinates(B2.max)))
+    return Box(S, T)
 end
 
 end
