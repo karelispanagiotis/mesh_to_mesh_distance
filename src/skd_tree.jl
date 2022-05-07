@@ -1,6 +1,7 @@
 module SKDTree
 
 export sKDTree,
+       build_sKDTree,
        nearest_neighbour
 
 include("utilities.jl")
@@ -12,6 +13,7 @@ using .Utilities, .PrimitiveDistances
 struct sKDTree{V, Dim, T}
     data::Vector{V}
     nodes::Vector{Box{Dim,T}}
+    aabbs::Vector{Box{Dim,T}}
     indices::Vector{Int}
     leaf_size::Int
 end
@@ -22,9 +24,12 @@ function build_sKDTree(tree::sKDTree,
                        hi::Int,
                        split_dim::Int,
                        centroids::Vector{<:Point})
-    data, nodes, indices, leaf_size = tree.data, tree.nodes, tree.indices, tree.leaf_size
-    if hi == lo
-        nodes[v] = boundingbox(data[indices[lo]])
+    data, nodes, indices, aabbs= tree.data, tree.nodes, tree.indices, tree.aabbs
+    if hi-lo+1 ≤ tree.leaf_size
+        nodes[v] = aabbs[indices[lo]]
+        for i in lo+1:hi
+            nodes[v] = combine_boxes(nodes[v], aabbs[indices[i]])
+        end
         return nothing
     end
 
@@ -48,12 +53,17 @@ function nn_search(tree::sKDTree{V,Dim,T},
                    query::Geometry{Dim, T}, 
                    query_aabb::Box{Dim, T},
                    radius²::T) where {V, Dim, T}
-    data, nodes, indices, leaf_size = tree.data, tree.nodes, tree.indices, tree.leaf_size
-    if lo == hi
-        return distance²(query, data[indices[lo]]), indices[lo]
-    end
-
+    data, nodes, indices, aabbs= tree.data, tree.nodes, tree.indices, tree.aabbs
     min_dist², nn_id = radius², typemax(eltype(indices))
+    
+    if hi-lo+1 ≤ tree.leaf_size
+        for i in lo:hi
+            if distance²(query_aabb, aabbs[indices[i]]) < min_dist²
+                min_dist², nn_id = min( (min_dist²,nn_id), (distance²(query, data[indices[i]]), indices[i]) )
+            end
+        end
+        return min_dist², nn_id
+    end
 
     mid = (lo+hi)>>>1
     left, right  = v+1, v+2*(mid-lo+1)
@@ -91,11 +101,10 @@ function nearest_neighbour(tree::sKDTree{V,Dim,T}, query::Geometry{Dim,T}; radiu
     return nn_search(tree, 1, 1, length(tree.data), query, query_aabb, radius²)
 end
 
-function sKDTree(data::Vector{<:Geometry{Dim,T}}; leafsize=1) where {Dim,T}
+function sKDTree(data::Vector{<:Geometry{Dim,T}}; leafsize=ceil(Int, log2(length(data)))) where {Dim,T}
     N = length(data)
-    tree = sKDTree(data, Vector{Box{Dim,T}}(undef, 2*N), Vector(1:N), leafsize)
-    centroids = centroid.(data)
-    build_sKDTree(tree, 1, 1, N, 1, centroids)
+    tree = sKDTree(data, Vector{Box{Dim,T}}(undef, 2*N), boundingbox.(data), Vector(1:N), leafsize)
+    build_sKDTree(tree, 1, 1, N, 1, center.(tree.aabbs))
     return tree
 end
 
