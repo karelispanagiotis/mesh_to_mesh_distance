@@ -1,7 +1,6 @@
 module SKDTree
 
 export sKDTree,
-       build_sKDTree,
        nearest_neighbour
 
 include("utilities.jl")
@@ -96,15 +95,16 @@ function nn_search(tree::sKDTree{V,Dim,T},
     return (min_dist², nn_id)
 end
 
-function nearest_neighbour(tree::sKDTree{V,Dim,T}, query::Geometry{Dim,T}; radius²::T=typemax(T)) where{V,Dim,T} 
-    query_aabb = boundingbox(query)
-    return nn_search(tree, 1, 1, length(tree.data), query, query_aabb, radius²)
+function nearest_neighbour(tree::sKDTree{V,Dim,T}, 
+                           query::Geometry{Dim,T};
+                           radius²::T=typemax(T)) where{V,Dim,T} 
+    return nn_search(tree, 1, 1, length(tree.data), query, boundingbox(query), radius²)
 end
 
-function sKDTree(data::Vector{<:Geometry{Dim,T}}; leafsize=ceil(Int, log2(length(data)))) where {Dim,T}
-    N = length(data)
-    tree = sKDTree(data, Vector{Box{Dim,T}}(undef, 2*N), boundingbox.(data), Vector(1:N), leafsize)
-    build_sKDTree(tree, 1, 1, N, 1, center.(tree.aabbs))
+function sKDTree(data::Vector{<:Geometry{Dim,T}}; leafsize::Int=ceil(Int,log2(length(data)))) where {Dim,T}
+    n = length(data)
+    tree = sKDTree(data, Vector{Box{Dim,T}}(undef, 2*n), boundingbox.(data), Vector(1:n), leafsize)
+    build_sKDTree(tree, 1, 1, n, 1, center.(tree.aabbs))
     return tree
 end
 
