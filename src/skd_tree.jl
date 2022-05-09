@@ -1,6 +1,7 @@
 module SKDTree
 
 export sKDTree,
+       build_sKDTree,
        nearest_neighbour
 
 include("utilities.jl")
@@ -8,6 +9,7 @@ include("primitive_distances.jl")
 
 using Meshes
 using .Utilities, .PrimitiveDistances
+using Base.Threads
 
 struct sKDTree{V, Dim, T}
     data::Vector{V}
@@ -21,7 +23,7 @@ function build_sKDTree(tree::sKDTree,
                        v::Int,
                        lo::Int,
                        hi::Int,
-                       split_dim::Int,
+                       depth::Int,
                        centroids::Vector{<:Point})
     data, nodes, indices, aabbs= tree.data, tree.nodes, tree.indices, tree.aabbs
     if hi-lo+1 ≤ tree.leaf_size
@@ -33,14 +35,20 @@ function build_sKDTree(tree::sKDTree,
     end
 
     mid = (lo+hi)>>>1
+    split_dim::Int = mod(depth, 1:3) 
     select!(indices, lo, hi, mid, by = i -> coordinates(centroids[i])[split_dim])
 
-    next_split::Int = mod(split_dim+1, 1:3)
-
     left, right  = v+1, v+2*(mid-lo+1)
-    build_sKDTree(tree, left , lo   , mid,  next_split, centroids)
-    build_sKDTree(tree, right, mid+1, hi ,  next_split, centroids)
-    
+    if nthreads() ≥ 2^(depth-1)
+        # Build in parallel
+        task = @spawn build_sKDTree(tree, left, lo, mid, depth+1, centroids)
+        build_sKDTree(tree, right, mid+1, hi , depth+1, centroids)
+        wait(task)
+    else 
+        # Build sequentially
+        build_sKDTree(tree, left , lo   , mid, depth+1, centroids)
+        build_sKDTree(tree, right, mid+1, hi , depth+1, centroids)
+    end
     nodes[v] = combine_boxes(nodes[left], nodes[right])
     return nothing
 end
