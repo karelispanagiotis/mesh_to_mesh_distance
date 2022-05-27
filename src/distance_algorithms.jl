@@ -10,6 +10,13 @@ include("skd_tree.jl")
 using Meshes
 using Base.Threads, .PrimitiveDistances, .SKDTree
 
+function getrange(N) 
+    work = ceil(Int, N/nthreads())
+    lo = 1 + (threadid()-1)*work
+    hi = min(threadid()*work, N)
+    return lo:hi
+end
+
 function alg_bruteforce(trias1, trias2)
     mindist = Inf32
     tid1 = tid2 = typemax(Int)
@@ -38,7 +45,6 @@ function alg_bruteforce_bbox(trias1, trias2)
 end
 
 function alg_bruteforce_bbox_threads(trias1, trias2)
-    getrange(N) = (work = ceil(Int, N/nthreads()); 1 + (threadid()-1)*work : min(threadid()*work, N))
     
     boxes1 = boundingbox.(trias1)
     boxes2 = boundingbox.(trias2)
@@ -66,11 +72,21 @@ end
 
 function alg_tree_queries(trias1, trias2)
     tree = sKDTree(trias1)
-    mindist, tid1, tid2 = Inf32, typemax(Int), typemax(Int)
-    for i in 1:length(trias2)
-        (mindist, tid1), tid2 = min( ((mindist,tid1),tid2), (nearest_neighbour(tree,trias2[i]; radius²=mindist),i) )
+
+    g_mindist = zeros(Float32, nthreads())
+    g_tid1 = zeros(Int, nthreads()) 
+    g_tid2 = zeros(Int, nthreads())
+    @threads for t in 1:nthreads()
+        mindist, id1, id2 = Inf32, typemax(Int), typemax(Int)
+        for i in getrange(length(trias2))
+            (mindist, id1), id2 = min( ((mindist,id1),id2), (nearest_neighbour(tree,trias2[i]; radius²=mindist),i) )
+        end
+        g_mindist[threadid()] = mindist
+        g_tid1[threadid()] = id1
+        g_tid2[threadid()] = id2 
     end
-    return mindist, tid1, tid2
+    i = argmin(g_mindist)
+    return g_mindist[i], g_tid1[i], g_tid2[i]
 end
 
 end
