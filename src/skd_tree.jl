@@ -2,7 +2,8 @@ module SKDTree
 
 export sKDTree,
        build_sKDTree,
-       nearest_neighbour
+       nearest_neighbour,
+       nearest_neighbours
 
 include("utilities.jl")
 include("primitive_distances.jl")
@@ -103,10 +104,64 @@ function nn_search(tree::sKDTree{V,Dim,T},
     return (min_dist², nn_id)
 end
 
+function nns_search(tree1::sKDTree{V, Dim, T},
+                    tree2::sKDTree{V, Dim, T},
+                    v::Int,
+                    lo::Int,
+                    hi::Int,
+                    radius²::T=typemax(T)) where {V, Dim, T}
+    data, nodes, indices, aabbs= tree2.data, tree2.nodes, tree2.indices, tree2.aabbs
+    min_dist², nn_id₁, nn_id₂  = radius², typemax(eltype(indices)), typemax(eltype(indices))
+
+    if hi-lo+1 ≤ tree2.leaf_size
+        for i in lo:hi
+            tmp_min_dist², tmp_nn_id₁ = nn_search(tree1, 1, 1, length(tree1.data), data[indices[i]], aabbs[indices[i]], min_dist²)
+            min_dist², nn_id₁, nn_id₂ = min((min_dist²,nn_id₁,nn_id₂), (tmp_min_dist²,tmp_nn_id₁,indices[i]))
+        end
+        return min_dist², nn_id₁, nn_id₂
+    end
+
+    mid = (lo+hi)>>>1
+    left, right  = v+1, v+2*(mid-lo+1)
+
+    left_dist  = distance²(nodes[left] , tree1.nodes[1])
+    right_dist = distance²(nodes[right], tree1.nodes[1])
+
+    if left_dist < right_dist
+        # Search in the left sub-tree
+        if left_dist < min_dist²
+            min_dist², nn_id₁, nn_id₂ = min((min_dist²,nn_id₁,nn_id₂), nns_search(tree1, tree2, left, lo, mid, min_dist²))
+        end
+
+        # Search in the right sub-tree
+        if right_dist < min_dist²
+            min_dist², nn_id₁, nn_id₂ = min((min_dist²,nn_id₁,nn_id₂), nns_search(tree1, tree2, right, mid+1, hi, min_dist²))
+        end 
+    else
+        # Search in the right sub-tree
+        if right_dist < min_dist²
+            min_dist², nn_id₁, nn_id₂ = min((min_dist²,nn_id₁,nn_id₂), nns_search(tree1, tree2, right, mid+1, hi, min_dist²))
+        end 
+
+        # Search in the left sub-tree
+        if left_dist < min_dist²
+            min_dist², nn_id₁, nn_id₂ = min((min_dist²,nn_id₁,nn_id₂), nns_search(tree1, tree2, left, lo, mid, min_dist²))
+        end
+    end
+
+    return (min_dist², nn_id₁, nn_id₂)
+end
+
+
 function nearest_neighbour(tree::sKDTree{V,Dim,T}, 
                            query::Geometry{Dim,T};
                            radius²::T=typemax(T)) where{V,Dim,T} 
     return nn_search(tree, 1, 1, length(tree.data), query, boundingbox(query), radius²)
+end
+
+function nearest_neighbours(tree1::sKDTree{V,Dim,T}, 
+                           tree2::sKDTree{V,Dim,T}) where{V,Dim,T} 
+    return nns_search(tree1, tree2, 1, 1, length(tree2.data)) 
 end
 
 function sKDTree(data::Vector{<:Geometry{Dim,T}}; leafsize::Int=ceil(Int,log2(length(data)))) where {Dim,T}

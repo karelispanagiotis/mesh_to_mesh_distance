@@ -3,7 +3,8 @@ module DistanceAlgorithms
 export  alg_bruteforce,
         alg_bruteforce_bbox,
         alg_bruteforce_bbox_threads,
-        alg_tree_queries
+        alg_tree_queries,
+        alg_two_trees
 
 include("primitive_distances.jl")
 include("skd_tree.jl")
@@ -87,6 +88,13 @@ function alg_tree_queries(trias1, trias2)
     end
     i = argmin(g_mindist)
     return g_mindist[i], g_tid1[i], g_tid2[i]
+end
+
+function alg_two_trees(trias1, trias2)
+    task = @spawn sKDTree(trias1)
+    tree2 = sKDTree(trias2)
+    tree1 = fetch(task)
+    return nearest_neighbours(tree1, tree2)
 end
 
 end
