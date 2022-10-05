@@ -18,6 +18,10 @@
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{tikz}
+\usepackage[ruled,nosemicolon,vlined,linesnumbered]{algorithm2e}
+\let\oldnl\nl% Store \nl in \oldnl
+\newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}% Remove line number for one line
+
 
 \graphicspath{{../graphics/}}
 
