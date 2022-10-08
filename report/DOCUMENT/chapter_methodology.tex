@@ -16,14 +16,10 @@
 \subsubsection{Ευκλείδεια Απόσταση δύο Ευθυγράμμων Τμημάτων}
 \subsubsection{Ευκλείδεια Απόσταση Σημείου και Τριγώνου}
 
-\subsection{Ευκλείδεια Απόσταση δύο \tl{AABB}}
-Έστω τα ευθυγραμμισμένα με τους άξονες πλαίσια
-$P$ και $Q$ στον $\mathbb{R}^3$.
-Η Ευκλείδεια απόσταση $d(P,Q)$ μεταξύ των πλαισίων $P$ και $Q$
-ορίζεται ως:
-\[ d(P,Q) = \min_{p \in P, q \in Q} \lVert p - q \rVert \]
-όπου με $\lVert p - q \rVert$ συμβολίζεται η Ευκλείδεια 
-απόσταση των σημείων $p$ και $q$.
+\subsection{Γεωμετρικές Πράξεις για \tl{AABB}}
+Ένα οριοθετικό πλαίσιο ευθυγραμμισμένο με τους άξονες (\tl{AABB})
+είναι, απλώς, ένα ορθογώνιο παραλληλεπίπεδο του οποίου οι 
+έδρες είναι κάθετες σε ένα από τα διανύσματα βάσης.
 
 Ένα \tl{AABB} αναπαριστάται στη μνήμη από τα άκρα της κύριας 
 διαγωνίου του.
@@ -60,6 +56,14 @@ $P$ και $Q$ στον $\mathbb{R}^3$.
     \caption[Αναπαράσταση ενός \tl{AABB}]{Αναπαράσταση ενός \tl{AABB}}
 \end{figure}
 
+\subsubsection{Υπολογισμός Απόστασης \tl{AABB-AABB}}
+Έστω τα ευθυγραμμισμένα με τους άξονες πλαίσια
+$P$ και $Q$ στον $\mathbb{R}^3$.
+Η Ευκλείδεια απόσταση $d(P,Q)$ μεταξύ των πλαισίων $P$ και $Q$
+ορίζεται ως:
+\[ d(P,Q) = \min_{p \in P, q \in Q} \lVert p - q \rVert \]
+όπου με $\lVert p - q \rVert$ συμβολίζεται η Ευκλείδεια 
+απόσταση των σημείων $p$ και $q$.
 
 Για τον υπολογισμό της απόστασης μεταξύ δύο τέτοιων πλαισίων, 
 εκμεταλλευόμαστε το γεγονός ότι οι πλευρές τους είναι ευθυγραμμισμένες
@@ -72,10 +76,11 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
 Ο τελεστής \tl{\texttt{max(0, $v$)}} είναι επίσης διανυσματικός και
 αντικαθιστά όλες τις αρνητικές τιμές ενός διανύσματος $v$
 με $0$.
+Ο τελεστής $\cdot$ είναι το εσωτερικό γινόμενο διανυσμάτων.
 
 \selectlanguage{english}
 \IncMargin{1.5em}
-\begin{algorithm}[h]
+\begin{algorithm}[H]
     \DontPrintSemicolon
     \KwIn{Two AABBs $P$, $Q$}
     \KwOut{Euclidean Distance of $P$ and $Q$}
@@ -91,6 +96,71 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
         \tg{Υπολογισμός της Ευκλείδειας Απόστασης δύο AABB}
     }
     \label{alg:aabb_dist}
+\end{algorithm}
+\DecMargin{1.5em}
+\selectlanguage{greek}
+
+\subsubsection{Κατασκευή \tl{AABB} Από Τρίγωνο}
+Με τον αλγόριθμο \ref{alg:aabb_from_triangle} κατασκευάζουμε 
+ένα \tl{AABB} που εξ' ολοκλήρου περικλείει ένα τρίγωνο.
+Η ρουτίνα \tl{\texttt{vertices($T$)}} επιστρέφει τις 
+τρεις κορυφές του τριγώνου $T$.
+Οι τελεστές \tl{\texttt{min(), max()}} είναι διανυσματικοί,
+δέχονται ως όρισμα μια λίστα από διανύσματα και επιστρέφουν 
+ένα διάνυσμα με τις ελάχιστες/μέγιστες συντεταγμένες ανά άξονα.
+
+\selectlanguage{english}
+\IncMargin{1.5em}
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    \KwIn{A Triangle $T$}
+    \KwOut{An AABB Enclosing $T$}
+    \SetKwFunction{funcname}{AABB}
+    \SetKwFunction{min}{min}
+    \SetKwFunction{max}{max}
+    \SetKwFunction{vertices}{vertices}
+    \Indm\nonl\funcname($T$)\\
+    \Indp
+        $S \gets \min(\vertices(T))$\;
+        $T \gets \max(\vertices(T))$\; 
+        \Return{ \{$S$, $T$\}}
+    \caption[Κατασκευή \tl{AABB} από Τρίγωνο]{
+        \tg{Κατασκευή \tl{AABB} από Τρίγωνο}
+    }
+    \label{alg:aabb_from_triangle}
+\end{algorithm}
+\DecMargin{1.5em}
+\selectlanguage{greek}
+
+\subsubsection{Συνένωση Δύο \tl{AABB}}
+Ο αλγόριθμος \ref{alg:combine_aabbs} κατασκευάζει ένα \tl{AABB} περικλείει
+εξ' ολοκλήρου δύο άλλα \tl{AABB} που δέχεται ως ορίσματα. 
+Αυτή η πράξη είναι χρήσιμη γιατί αν έχουμε ήδη βρει τα \tl{AABB} για δύο 
+ομάδες αντικειμένων ξεχωριστά, μπορούμε σε σταθερό χρόνο $\bigO(1)$ να 
+κατασκευάσουμε το \tl{AABB} που περικλείει όλα τα αντικείμενα. 
+Οι τελεστές \tl{\texttt{min(), max()}} είναι ίδιοι με πριν.
+
+\selectlanguage{english}
+\IncMargin{1.5em}
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    \KwIn{Two AABBs $P$, $Q$}
+    \KwOut{An AABB Enclosing $P$ and $Q$}
+    \SetKwFunction{funcname}{combine\_AABB}
+    \Indm\nonl\funcname($P$, $Q$)\\
+    \Indp
+        
+    $S \gets \min(P.S, Q.S)$\;
+    $T \gets \max(P.T, Q.T)$\; 
+    \Return{ \{$S$, $T$\}}
+    \caption[Κατασκευή \tl{AABB} από Τρίγωνο]{
+        \tg{Κατασκευή \tl{AABB} από Τρίγωνο}
+    }
+
+    \caption[...]{
+        \tg{...}
+    }
+    \label{alg:combine_aabbs}
 \end{algorithm}
 \DecMargin{1.5em}
 \selectlanguage{greek}
