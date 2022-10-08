@@ -3,7 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[english,greek]{babel}
-\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage[parfill]{parskip}
 \usepackage[unicode]{hyperref}
 \usepackage{bookmark}
@@ -18,7 +18,7 @@
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{tikz}
-\usepackage[ruled,nosemicolon,vlined,linesnumbered]{algorithm2e}
+\usepackage[ruled,nosemicolon,linesnumbered]{algorithm2e}
 \let\oldnl\nl% Store \nl in \oldnl
 \newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}% Remove line number for one line
 
@@ -29,6 +29,7 @@
 \def\tg{\textgreek}
 
 \newtheorem{definition}{Ορισμός}
+\newtheorem{lemma}{Λήμμα}
 
 \def\bigO{\mathcal{O}}
 
