@@ -135,7 +135,7 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
     \label{alg:aabb_from_triangle}
     \caption[Κατασκευή \tl{AABB} από Τρίγωνο]{
         \tg{Κατασκευή \tl{AABB} από Τρίγωνο}
-    }
+        }
     \DontPrintSemicolon
     \KwIn{A Triangle $T$}
     \KwOut{An AABB Enclosing $T$}
@@ -171,8 +171,8 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
     \DontPrintSemicolon
     \KwIn{Two AABBs $P$, $Q$}
     \KwOut{An AABB Enclosing $P$ and $Q$}
-    \SetKwFunction{funcname}{combine\_AABB}
-    \Indm\nonl\funcname($P$, $Q$)\\
+    \SetKwFunction{combineAABB}{combine\_AABB}
+    \Indm\nonl\combineAABB($P$, $Q$)\\
     \Indp
         
     $S \gets \min(P.S, Q.S)$\;
@@ -196,10 +196,9 @@ $N$ και $M$ είναι το πλήθος των τριγώνων των δύ�
 \selectlanguage{english}
 \IncMargin{1.5em}
 \begin{algorithm}[h]
-
     \caption[Απόσταση Τριγωνικών Πλεγμάτων με Πλήρη Αναζήτηση]{
         \tg{Απόσταση Τριγωνικών Πλεγμάτων με Πλήρη Αναζήτηση}
-    }
+        }
     \label{alg:exhaustive_search}
     \DontPrintSemicolon
     \KwIn{Two Triangle Meshes $P$, $Q$}
@@ -389,10 +388,225 @@ $N$ και $M$ είναι το πλήθος των τριγώνων των δύ�
 μέτρηση των χρόνων εκτέλεσης των πειραμάτων.
 
 
-\section{Σχεδιασμός μιας \tl{BVH} Δομής Δεδομένων, το \tl{sKD-Tree}}
+\section{Σχεδιασμός μιας Δομής \tl{BVH}, το \tl{sKD-Tree}}
 \label{sec:design_bvh}
+Για τον υπολογισμό της απόστασης των δύο πλεγμάτων αποδοτικά, 
+αρχικά κάνουμε μια προ-επεξεργασία των δεδομένων οργανώνοντας 
+τα σε μια Ιεραρχία Οριοθετικών Όγκων (\tl{BVH}).
+Έπειτα σχεδιάζουμε αλγορίθμους, που εκμεταλλευόμενοι αυτή την 
+ιεραρχική οργάνωση, παρουσιάζουν καλύτερη υπολογιστική πολυπλοκότητα,
+μέσης περίπτωσης, σε σχέση με τους αλγορίθμους εξαντλητικής αναζήτησης.
+Επειδή ο τρόπος οργάνωσης των χωρικών δεδομένων είναι παρόμοιος  
+με τον τρόπο κατασκευής του \tl{KD-Tree}, η δομή που προτείνουμε 
+ονομάζεται \tl{spatial KD-Tree} ή \tl{sKD-Tree}.
 
 \subsection{Κατασκευή του \tl{sKD-Tree}}
+Το \tl{sKD-Tree} είναι ένα σχεδόν πλήρες, ισορροπημένο, δυαδικό δέντρο
+που χρησιμοποιεί \tl{AABB} για την οργάνωση των αντικειμένων. 
+Η ιεραρχία κατασκευάζεται με βάση τα στοιχεία (\tl{elements/primitives})
+ενός αντικειμένου.
+Στην περίπτωση μας τα στοιχεία είναι τρίγωνα.
+Κάθε κόμβος του δέντρου είναι ένα \tl{AABB}, ενώ το δέντρο έχει τις 
+παρακάτω ιδιότητες:
+\begin{itemize}
+    \item Η ένωση των AABB των φύλλων του δέντρου περικλείει εξ' 
+    ολοκλήρου την επιφάνεια του αντικειμένου.
+    \item Το \tl{AABB} ενός κόμβου περικλείει εξ' ολοκλήρου τα 
+    \tl{AABB} όλων των απογόνων του. 
+\end{itemize}
+
+Η ιδέα για την κατασκευή της ιεραρχίας είναι η ακόλουθη:
+Αρχικά, τα φύλλα του δέντρου σχεδόν προσεγγίζουν την επιφάνεια του αντικειμένου και
+οι εσωτερικοί κόμβοι αναπαριστούν προσεγγίσεις των απογόνων φύλλων τους.
+Έτσι, όσο πιο κοντά στη ρίζα βρίσκεται ένας κόμβος, τόσο πιο αδρή είναι η 
+προσέγγιση της επιφάνειας.
+Η οργάνωση αυτή είναι χρήσιμη, γιατί με βάση το \tl{AABB} κάποιου εσωτερικού 
+κόμβου, μπορεί να βρεθεί το κάτω φράγμα της απόστασης προς οποιοδήποτε στοιχείο
+της επιφάνειας.
+
+Το πρώτο βήμα για την κατασκευή του \tl{sKD-Tree} είναι η επικάλυψη 
+των τριγώνων του πλέγματος με \tl{AABB}.
+Αυτά θα αποτελούν τα φύλλα του δέντρου.
+Έπειτα ακολουθούμε μια στρατηγική από πάνω προς τα κάτω ξεκινώντας 
+από τη ρίζα του δέντρου. 
+Σε κάθε βήμα, τα $n$ τρίγωνα του κόμβου χωρίζονται σε δύο υποσύνολα 
+μεγέθους $\lfloor n/2\rfloor$ και $\lceil n/2 \rceil$ αντίστοιχα.
+Για κάθε ένα από τα σύνολα, καλείται η αναδρομική ρουτίνα που δημιουργεί 
+τα δύο υποδέντρα.  
+Στη συνέχεια, τα \tl{AABB} των δύο παιδιών του κόμβου ενώνονται 
+και δημιουργείται το \tl{AABB} του τρέχοντος κόμβου.
+Η αναδρομή σταματά όταν το σύνολο αποτελείται από ένα μόνο τρίγωνο, 
+του οποίου το \tl{AABB} είχαμε υπολογίσει στην αρχή.
+
+Για τον διαχωρισμό των τριγώνων σε δύο υποσύνολα, αρχικά, επιλέγεται 
+ένα \textit{αντιπροσωπευτικό σημείο} για κάθε τρίγωνο.
+Στην υλοποίηση μας, το αντιπροσωπευτικό σημείο για το κάθε τρίγωνο 
+επιλέγεται να είναι το κέντρου του \tl{AABB} του\footnote{Επιλέγουμε 
+σημείο με βάση το \tl{AABB} και όχι με βάση το τρίγωνο για να είναι 
+εύκολη η επέκταση του αλγορίθμου και σε στοιχεία άλλου τύπου}.
+Ο διαχωρισμός γίνεται είτε με βάση τον άξονα $x$, είτε με τον $y$, είτε 
+με τον $z$.
+Ο άξονας αυτός εναλλάσσεται κυκλικά σε κάθε επίπεδο του δέντρου.
+Έστω ότι ο άξονας διαχωρισμού είναι ο $k \in \{x,y,z\}$. 
+Συμβολίζουμε με $T_i$ το $i$-στο τρίγωνο (από τα $n$)
+κάποιου κόμβου, ενώ με $RP_i$ συμβολίζουμε το αντιπροσωπευτικό του 
+σημείο.
+Αν $m$ είναι η διάμεσος των τιμών $RP_{ik}$ τότε τα δύο σύνολα 
+που προκύπτουν είναι τα $L = \{T_i \mid RP_{ik} \leq m \}$ και 
+$R = \{T_i  \mid  RP_{ik} \geq m \}$ 
+τέτοια ώστε 
+$|L| = \lfloor n/2 \rfloor$ και $|R| = \lceil n/2 \rceil$.
+Για τον διαχωρισμό των τριγώνων χρησιμοποιείται ο 
+αλγόριθμος \texttt{\tl{QUICKSELECT}} \cite{hoare1961algorithm}.
+
+Τα παραπάνω συνοψίζονται στους αλγορίθμους \ref{alg:tree_construction} και 
+\ref{alg:tree_construction_recursive}.
+Για να υπολογίσουμε την υπολογιστική πολυπλοκότητα του αλγορίθμου 
+\ref{alg:tree_construction_recursive} θα χρησιμοποιήσουμε το 
+\textit{Θεώρημα του Κυρίαρχου Όρου (\tl{Master Theorem)
+\cite{bentley1980general}}}:
+Για κάθε αναδρομική κλήση ο αριθμός των πράξεων είναι 
+$T(n) = 2*T(n/2) + \bigO(n) + \bigO(1)$.
+Επομένως, η πολυπλοκότητα του αλγορίθμου αυτού είναι 
+$\bigO(n*logn)$, όπου $n$ είναι ο αριθμός των τριγώνων 
+του πλέγματος.
+Συνεπώς, και ο αλγόριθμος \ref{alg:tree_construction} έχει 
+ακριβώς την ίδια υπολογιστική πολυπλοκότητα.
+
+\selectlanguage{english}
+\IncMargin{1.5em}
+\begin{algorithm}[H]
+    \caption[Κατασκευή του \tl{sKD-Tree}]{
+        \tg{Κατασκευή του} sKD-Tree
+        }
+    \label{alg:tree_construction}
+    \DontPrintSemicolon
+    \KwIn{A Triangle Mesh $M$}
+    \KwOut{The Root of the sKD-Tree}
+    \SetKwFunction{funcname}{tree\_build}
+    \SetKwFunction{trias}{triangles}
+    \SetKwFunction{buildrecur}{tree\_build\_recursive}
+    \Indm\nonl\funcname($M$)\\
+    \Indp
+        $T \gets \trias(M)$ \;
+        precalculate AABBs of $T$\;
+        precalculate $RP$s of $T$\;
+        $root$ is the root of the tree \;
+        $\buildrecur(root, T, x)$\;
+        \Return{$root$}
+
+\end{algorithm}
+\DecMargin{1.5em}
+\selectlanguage{greek}
+
+\selectlanguage{english}
+\IncMargin{1.5em}
+\begin{algorithm}[H]
+    \caption[Αναδρομική Κατασκευή του \tl{sKD-Tree}]{
+        \tg{Αναδρομική Κατασκευή του} sKD-Tree
+        }
+    \label{alg:tree_construction_recursive}
+    \DontPrintSemicolon
+    \KwIn{A tree node $v$, a set of triangles $T$, a splitting axis $axis$}
+    \KwOut{Fills the node's entries, thus building the tree}
+    \SetKwFunction{buildrecur}{tree\_build\_recursive}
+    \SetKwFunction{split}{split\_triangles}
+    \SetKwFunction{nextaxis}{next\_axis}
+    \Indm\nonl\buildrecur($v$, $T$, $axis$)\\
+    \Indp
+        \If{$|T| = 1$}{
+            $v.aabb \gets \aabb(T_1)$\;
+            \Return{}
+        }
+
+        $L, R \gets \split(T, axis)$ \;
+        $axis \gets \nextaxis(axis)$\;
+        $\buildrecur(v.left, L, axis)$ \;
+        $\buildrecur(v.right, R, axis)$ \;
+        $v.aabb \gets \combineAABB(v.left.aabb, v.right.aabb)$ \;
+\end{algorithm}
+\DecMargin{1.5em}
+\selectlanguage{greek}
+
+Στην εικόνα \ref{fig:tree_construction} φαίνεται ο τρόπος με τον  
+οποίο κατασκευάζεται ένα \tl{sKD-Tree}.
+
+\begin{figure}[H]
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_1.png}
+        \caption{Επίπεδο $1$ (ρίζα)}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_2.png}
+        \caption{Επίπεδο $2$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_3.png}
+        \caption{Επίπεδο $3$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_4.png}
+        \caption{Επίπεδο $4$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_5.png}
+        \caption{Επίπεδο $5$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_6.png}
+        \caption{Επίπεδο $6$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_9.png}
+        \caption{Επίπεδο $9$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_10.png}
+        \caption{Επίπεδο $10$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_11.png}
+        \caption{Επίπεδο $11$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_12.png}
+        \caption{Επίπεδο $12$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_13.png}
+        \caption{Επίπεδο $13$}        
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_leaves.png}
+        \caption{Φύλλα του δέντρου}        
+    \end{subfigure}
+
+    \caption[Κατασκευή \tl{sKD-Tree}]{
+        Κατασκευή \tl{sKD-Tree} για το \tl{Stanford Dragon} - 
+        Οι διάφορες εικόνες 
+        αναπαριστούν κάποια επίπεδα του δέντρου.
+        Η τελευταία εικόνα απεικονίζει τα φύλλα του 
+        δέντρου. \footnote{Το \tl{sKD-Tree} είναι ένα 
+        σχεδόν πλήρες δέντρο, επομένως τα φύλλα του 
+        μπορούν να καταλαμβάνουν τα δύο τελευταία επίπεδα
+        του δέντρου.}
+    }
+    \label{fig:tree_construction}
+\end{figure}
+
+
 \subsection{Ερωτήματα Κοντινότερου Γείτονα στο \tl{sKD-Tree}}
 
 \section{Αλγόριθμοι που χρησιμοποιούν τη δομή \tl{sKD-Tree}}
