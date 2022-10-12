@@ -106,7 +106,7 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
     }
     \DontPrintSemicolon
     \KwIn{Two AABBs $P$, $Q$}
-    \KwOut{Euclidean Distance of $P$ and $Q$}
+    \KwOut{Euclidean distance of $P$ and $Q$}
     \SetKwFunction{funcname}{AABB\_distance}
     \SetKwFunction{max}{max}
     \Indm\nonl\funcname($P$, $Q$)\\
@@ -137,8 +137,8 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
         \tg{Κατασκευή \tl{AABB} από Τρίγωνο}
         }
     \DontPrintSemicolon
-    \KwIn{A Triangle $T$}
-    \KwOut{An AABB Enclosing $T$}
+    \KwIn{A triangle $T$}
+    \KwOut{An AABB enclosing $T$}
     \SetKwFunction{funcname}{AABB}
     \SetKwFunction{min}{min}
     \SetKwFunction{max}{max}
@@ -170,7 +170,7 @@ $1$,$2$ είναι διανυσματική αφαίρεση των συντετ
     }
     \DontPrintSemicolon
     \KwIn{Two AABBs $P$, $Q$}
-    \KwOut{An AABB Enclosing $P$ and $Q$}
+    \KwOut{An AABB enclosing $P$ and $Q$}
     \SetKwFunction{combineAABB}{combine\_AABB}
     \Indm\nonl\combineAABB($P$, $Q$)\\
     \Indp
@@ -201,8 +201,8 @@ $N$ και $M$ είναι το πλήθος των τριγώνων των δύ�
         }
     \label{alg:exhaustive_search}
     \DontPrintSemicolon
-    \KwIn{Two Triangle Meshes $P$, $Q$}
-    \KwOut{Euclidean Distance of $P$ and $Q$}
+    \KwIn{Two triangle meshes $P$, $Q$}
+    \KwOut{Euclidean distance of $P$ and $Q$}
     \SetKwFunction{dist}{triangle\_distance}
     \SetKwFunction{trias}{triangles}
     \SetKwFunction{min}{min}
@@ -293,8 +293,8 @@ $N$ και $M$ είναι το πλήθος των τριγώνων των δύ�
         }
     \label{alg:exhaustive_search_aabb}
     \DontPrintSemicolon
-    \KwIn{Two Triangle Meshes $P$, $Q$}
-    \KwOut{Euclidean Distance of $P$ and $Q$}
+    \KwIn{Two triangle meshes $P$, $Q$}
+    \KwOut{Euclidean distance of $P$ and $Q$}
     \SetKwFunction{dist}{triangle\_distance}
     \SetKwFunction{aabbdist}{AABB\_distance}
     \SetKwFunction{trias}{triangles}
@@ -475,14 +475,14 @@ $\bigO(n*logn)$, όπου $n$ είναι ο αριθμός των τριγώνω
 
 \selectlanguage{english}
 \IncMargin{1.5em}
-\begin{algorithm}[H]
+\begin{algorithm}[h]
     \caption[Κατασκευή του \tl{sKD-Tree}]{
         \tg{Κατασκευή του} sKD-Tree
         }
     \label{alg:tree_construction}
     \DontPrintSemicolon
-    \KwIn{A Triangle Mesh $M$}
-    \KwOut{The Root of the sKD-Tree}
+    \KwIn{A triangle mesh $M$}
+    \KwOut{The root of the sKD-Tree}
     \SetKwFunction{funcname}{tree\_build}
     \SetKwFunction{trias}{triangles}
     \SetKwFunction{buildrecur}{tree\_build\_recursive}
@@ -501,7 +501,7 @@ $\bigO(n*logn)$, όπου $n$ είναι ο αριθμός των τριγώνω
 
 \selectlanguage{english}
 \IncMargin{1.5em}
-\begin{algorithm}[H]
+\begin{algorithm}[h]
     \caption[Αναδρομική Κατασκευή του \tl{sKD-Tree}]{
         \tg{Αναδρομική Κατασκευή του} sKD-Tree
         }
@@ -516,6 +516,7 @@ $\bigO(n*logn)$, όπου $n$ είναι ο αριθμός των τριγώνω
     \Indp
         \If{$|T| = 1$}{
             $v.aabb \gets \aabb(T_1)$\;
+            $v.triangle \gets T_1$\;
             \Return{}
         }
 
@@ -531,7 +532,7 @@ $\bigO(n*logn)$, όπου $n$ είναι ο αριθμός των τριγώνω
 Στην εικόνα \ref{fig:tree_construction} φαίνεται ο τρόπος με τον  
 οποίο κατασκευάζεται ένα \tl{sKD-Tree}.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \begin{subfigure}{0.5\textwidth}
         \centering
         \includegraphics[width=0.5\textwidth]{skdtree_construction/tree_level_1.png}
@@ -606,8 +607,151 @@ $\bigO(n*logn)$, όπου $n$ είναι ο αριθμός των τριγώνω
     \label{fig:tree_construction}
 \end{figure}
 
-
 \subsection{Ερωτήματα Κοντινότερου Γείτονα στο \tl{sKD-Tree}}
+Δοθέντος ενός συνόλου $T$ που αποτελείται από τρίγωνα και ενός 
+τυχαίου τριγώνου $q$ (\tl{\textit{query-triangle}}) αναζητούμε 
+το τρίγωνο $t \in T$ που απέχει τη μικρότερη Ευκλείδεια απόσταση 
+από το $q$. 
+Το πρόβλημα αυτό αποτελεί γενίκευση του \tl{kNN} για χωρικά 
+αντικείμενα, που στην περίπτωση μας είναι τρίγωνα που 
+σχηματίζουν κάποιο πλέγμα.
+Προφανώς, όπως αναφέρθηκε παραπάνω, η μεθοδολογία  
+που προτείνουμε μπορεί να γενικευτεί και για άλλα στοιχεία
+πέραν των τριγώνων.
+
+Η διαδικασία διάσχισης του \tl{sKD-Tree} που προτείνουμε
+για την απάντηση ερωτημάτων κοντινότερου γείτονα είναι μια 
+κατευθυνόμενη αναζήτηση κατά βάθος (\tl{DFS}).
+Αρχικά, επιλέγεται ένα μονοπάτι από τη ρίζα έως κάποιο φύλλο, το 
+οποίο είναι η πρώτη εκτίμηση κοντινότερου γείτονα.
+Για τον γείτονα αυτόν υπολογίζεται μια απόσταση.
+Αυτή η απόσταση ενημερώνεται κάθε φορά που εντοπίζεται 
+όλο και κοντινότερος γείτονας.
+Κατά την οπισθοδρόμηση (\tl{backtracking}) η διαδικασία χρησιμοποιώντας 
+την τρέχουσα εκτίμηση απόστασης κοντινότερου γείτονα απορρίπτει 
+μονοπάτια του δέντρου βάση του λήμματος \ref{lemma:box_distance}.
+
+
+Πιο αναλυτικά,
+έστω το τυχαίο τρίγωνο $q$ του ερωτήματος.
+Αρχικά κατασκευάζεται το \tl{AABB} του $q$ και ορίζεται 
+η απόσταση $dist$ του κοντινότερου γείτονα (έως τώρα) να είναι 
+άπειρη. 
+Έπειτα καλείται η αναδρομική διαδικασία αναζήτησης.
+Έστω ότι η διαδικασία επισκέπτεται
+κάποιον κόμβο $v$ του δέντρου. 
+Αν ο $v$ είναι εσωτερικός κόμβος, ο επόμενος κόμβος 
+που θα επισκεφθεί η διαδικασία επιλέγεται να είναι 
+αυτός που απέχει τη μικρότερη απόσταση από το \tl{AABB}
+του $q$.
+Δηλαδή, υπολογίζονται οι αποστάσεις \tl{AABB-AABB} των 
+δύο παιδιών του κόμβου ως προς το \tl{AABB} του $q$ και 
+επιλέγεται ο κοντινότερος.  
+Αν ο κόμβος $v$ είναι φύλλο, τότε υπολογίζεται η απόσταση 
+τρίγωνο-τρίγωνο και ενημερώνεται η μεταβλητή $dist$ όταν
+η απόσταση που υπολογίστηκε είναι μικρότερη.
+Κατά την οπισθοδρόμηση της αναδρομής, δηλαδή στη δεύτερη 
+επίσκεψη του κόμβου, θα πρέπει να γίνει έλεγχος αν 
+μπορεί να απορριφθεί το υποδέντρο του κόμβου που 
+δεν επιλέχθηκε προηγουμένως.
+
+Τα παραπάνω περιγράφονται στους αλγορίθμους \ref{alg:nearest_search}
+και \ref{alg:nearest_search_recursive}. 
+Συγκεκριμένα, για τον \ref{alg:nearest_search_recursive}:
+\begin{description}
+    \item[γραμμές 1-4] Είναι η περίπτωση όπου η αναζήτηση έχει 
+    φτάσει σε φύλλο του δέντρου, οπότε γίνεται έλεγχος απόστασης 
+    του $q$ από το τρίγωνο του φύλλου.
+    \item[γραμμές 5-6] Γίνεται υπολογισμός της απόστασης του 
+    \tl{AABB} του $q$ με τα \tl{AABB} των παιδιών του κόμβου. 
+    Αυτές οι αποστάσεις χρησιμοποιούνται για να καθοδηγήσουν 
+    την αναζήτηση.
+    \item[γραμμές 7,15] Γίνεται καθοδήγηση της σειράς με την 
+    οποία θα γίνει η αναζήτηση.
+    \item[γραμμές 8-13] Πρώτα γίνεται αναζήτηση στο αριστερό 
+    παιδί και έπειτα στο δεξί.
+    \item[γραμμές 16-21] Πρώτα γίνεται αναζήτηση στο δεξί 
+    παιδί και έπειτα στο αριστερό.
+    \item[γραμμές 11,19] Ελέγχουν αν είναι απαραίτητη 
+    η επίσκεψη στο παιδί που δεν επιλέχθηκε προηγουμένως.
+    \item[γραμμές 8,16] Επιτρέπουν πρόωρο τερματισμό της 
+    αναζήτησης (\tl{early exit}). 
+    Αυτό είναι χρήσιμο όταν ένας κόμβος δεν μπορεί να 
+    απορριφθεί κατά την αναζήτηση, όμως μπορούν να 
+    απορριφθούν τα παιδιά του.
+    Έτσι η αναζήτηση δε χρειάζεται να φτάσει μέχρι 
+    το φύλλο του υποδέντρου.
+\end{description}
+
+\selectlanguage{english}
+\IncMargin{1.5em}
+\begin{algorithm}[h]
+    \caption[Υπολογισμός Απόστασης Κοντινότερου Γείτονα]{
+        \tg{Υπολογισμός Απόστασης Κοντινότερου Γείτονα}
+        }
+    \label{alg:nearest_search}
+    \DontPrintSemicolon
+    \KwIn{An sKD-Tree $tree$, a query-triangle $q$, a search radius $r$ (optional)}
+    \KwOut{The distance of the nearest neighbor}
+    \SetKwFunction{nearestsearch}{nearest\_search}
+    \SetKwFunction{nearestsearchrecur}{nearest\_search\_recursive}
+    \Indm\nonl\nearestsearch($tree$, $q$)\\
+    \Indp
+        precalculate the AABB of $q$ \;
+        $distance \gets \infty$ \;
+        \nearestsearchrecur($tree.root$, $q$, $distance$)\;
+        \Return{$distance$}
+
+\end{algorithm}
+\DecMargin{1.5em}
+\selectlanguage{greek}
+
+\selectlanguage{english}
+\IncMargin{1.5em}
+\begin{algorithm}[h]
+    \caption[Αναδρομικός Υπολογισμός Απόστασης Κοντινότερου Γείτονα]{
+        \tg{Αναδρομικός Υπολογισμός Απόστασης Κοντινότερου Γείτονα}
+    }
+    \label{alg:nearest_search_recursive}
+    \DontPrintSemicolon
+    \KwIn{An sKD-Tree node $v$, a query-triangle $q$, NN distance so far $distance$}
+    \KwOut{Changes $distance$ to be the distance of the nearest neighbor}
+    \Indm\nonl\nearestsearchrecur($v$, $q$, $distance$)\\
+    \Indp
+        \If{$v$ is leaf}{
+            $distance \gets \min(distance, \dist(q, v.triangle))$ \;
+            \Return{}
+        }
+
+        $aabb\_dist\_l \gets \aabbdist(\aabb(q), v.left.aabb)$\;
+        $aabb\_dist\_r \gets \aabbdist(\aabb(q), v.right.aabb)$\;
+        \If{$distance_{left} < distance_{right}$}{
+            \If{$distance_{left} < distance$}{
+                \nearestsearchrecur($v.left$, $q$, $distance$)
+            }
+            \If{$distance_{right} < distance$}{
+                \nearestsearchrecur($v.right$, $q$, $distance$)
+            }
+        }
+        \Else{
+            \If{$distance_{right} < distance$}{
+                \nearestsearchrecur($v.right$, $q$, $distance$)
+            }
+            \If{$distance_{left} < distance$}{
+                \nearestsearchrecur($v.left$, $q$, $distance$)
+            }
+        }
+        \Return{}
+
+\end{algorithm}
+\DecMargin{1.5em}
+\selectlanguage{greek}
+
+Σημειώνουμε ότι δεν είναι εφικτό να υπολογίσουμε την πολυπλοκότητα 
+του αλγορίθμου αναζήτησης ούτε να εγγυηθούμε καλή επίδοση 
+χειρότερης περίπτωσης. 
+Αυτό οφείλεται στο ότι κατά την αναζήτηση μπορεί να γίνει 
+επίσκεψη και στα δύο υποδέντρα ενός κόμβου (ή μέρος τους).
 
 \section{Αλγόριθμοι που χρησιμοποιούν τη δομή \tl{sKD-Tree}}
 
