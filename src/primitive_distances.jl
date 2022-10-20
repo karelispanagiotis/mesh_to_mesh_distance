@@ -107,46 +107,27 @@ end
 #
 # Returns the squared distance of two triangles
 # 
-# Uses GJK Algorithm described in:
-# 
-# Gilbert, Elmer G., Daniel W. Johnson, and S. Sathiya Keerthi. 
-# A fast procedure for computing the distance between complex 
-# objects in three-dimensional space.
-# IEEE Journal on Robotics and Automation 4.2 (1988): 193-203.
+# Checks all possible scenarios for the minimum distance:
+#   * The minimum distance is between two edges or
+#   * The minimum distance is between a vertex and a face or
+#   * The minimum distance is zero, because the triangles intersect
 #-------------------------------------------------------------------
-
-
-EnhancedGJK.dimension(::Type{<:Geometry{Dim,T}}) where {Dim,T} = Val(Dim)
-EnhancedGJK.dimension(g::Geometry) = embeddim(typeof(g))
-
-function EnhancedGJK.any_inside(t::Triangle{Dim,T}) where {Dim,T}
-    return EnhancedGJK.Tagged(coordinates(centroid(t)))
-end
-
-function EnhancedGJK.support_vector_max(t::Triangle{Dim,T}, direction, initial_guess::EnhancedGJK.Tagged) where {Dim,T}
-    maxprod = typemin(T)
-    maxprod_i = 0
-
-    verts = vertices(t)
-    @inbounds for i in eachindex(verts)
-        prod = coordinates(verts[i]) ⋅ direction
-        if prod > maxprod
-            maxprod = prod 
-            maxprod_i = i
+function distance²(T1::Triangle{Dim,T}, T2::Triangle{Dim,T}) where {Dim,T}
+    A, B, C = vertices(T1)
+    X, Y, Z = vertices(T2)
+    edges1 = (Segment(A,B), Segment(B,C), Segment(C,A))
+    edges2 = (Segment(X,Y), Segment(Y,Z), Segment(Z,X))
+    
+    dist² = typemax(T)
+    for seg₁ ∈ edges1
+        for seg₂ ∈ edges2
+            dist² = min(dist², distance²(seg₁, seg₂))
         end
     end
-
-    EnhancedGJK.Tagged(coordinates(verts[maxprod_i]))
-end
-
-function distance²(t1::Triangle{Dim,T}, t2::Triangle{Dim,T}) where {Dim,T}
-    result = gjk(t1, t2)
-    if result.in_collision
-        return zero(T)
-    end
     
-    cp = closest_point_in_world(result)
-    return cp ⋅ cp
+    dist² = min(dist², vectices_to_triangle_check(vertices(T1), T2))
+    dist² = min(dist², vectices_to_triangle_check(vertices(T2), T1))
+    return dist²
 end
 
 #-------------------------------------------------------------------
