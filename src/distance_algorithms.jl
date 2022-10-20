@@ -19,7 +19,7 @@ function getrange(N)
 end
 
 function alg_bruteforce(trias1, trias2)
-    mindist = Inf32
+    mindist = typemax(coordtype(eltype(trias1)))
     tid1 = tid2 = typemax(Int)
     for i in 1:length(trias1)
         for j in 1:length(trias2)
@@ -33,7 +33,7 @@ function alg_bruteforce_bbox(trias1, trias2)
     boxes1 = boundingbox.(trias1)
     boxes2 = boundingbox.(trias2)
 
-    mindist = Inf32
+    mindist = typemax(coordtype(eltype(trias1)))
     tid1 = tid2 = typemax(Int)
     for i in 1:length(trias1)
         for j in 1:length(trias2)
@@ -74,11 +74,11 @@ end
 function alg_tree_queries(trias1, trias2)
     tree = sKDTree(trias1)
 
-    g_mindist = zeros(Float32, nthreads())
+    g_mindist = zeros(coordtype(eltype(trias1)), nthreads())
     g_tid1 = zeros(Int, nthreads()) 
     g_tid2 = zeros(Int, nthreads())
     @threads for t in 1:nthreads()
-        mindist, id1, id2 = Inf32, typemax(Int), typemax(Int)
+        mindist, id1, id2 = typemax(coordtype(eltype(trias1))), typemax(Int), typemax(Int)
         for i in getrange(length(trias2))
             (mindist, id1), id2 = min( ((mindist,id1),id2), (nearest_neighbour(tree,trias2[i]; radius²=mindist),i) )
         end
