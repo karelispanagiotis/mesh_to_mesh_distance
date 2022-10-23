@@ -217,6 +217,11 @@ function distance_endpoints(T1::Triangle, T2::Triangle)
     return endpoints
 end
 
+function PQP_SegPoints(s1::Segment, s2::Segment)
+    return PQP_SegPoints(minimum(s1), maximum(s1) - minimum(s1),
+                         minimum(s2), maximum(s2) - minimum(s2));
+end
+
 function PQP_SegPoints(P::Point{Dim,Type}, A::Vec{Dim,Type},
                        Q::Point{Dim,Type}, B::Vec{Dim,Type} ) where {Dim,Type}
     T = Q - P
