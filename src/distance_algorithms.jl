@@ -23,7 +23,7 @@ function alg_bruteforce(trias1, trias2)
     tid1 = tid2 = typemax(Int)
     for i in 1:length(trias1)
         for j in 1:length(trias2)
-            mindist, tid1, tid2 = min((mindist,tid1,tid2), (distance²(trias1[i], trias2[j]),i,j) ) 
+            mindist, tid1, tid2 = min((mindist,tid1,tid2), (triangle_distance²(trias1[i], trias2[j]),i,j) ) 
         end
     end
     return mindist, tid1, tid2
@@ -37,8 +37,8 @@ function alg_bruteforce_bbox(trias1, trias2)
     tid1 = tid2 = typemax(Int)
     for i in 1:length(trias1)
         for j in 1:length(trias2)
-            if distance²(boxes1[i], boxes2[j])<mindist
-                mindist, tid1, tid2 = min( (mindist, tid1, tid2), (distance²(trias1[i], trias2[j]),i,j) ) 
+            if AABB_distance²(boxes1[i], boxes2[j])<mindist
+                mindist, tid1, tid2 = min( (mindist, tid1, tid2), (triangle_distance²(trias1[i], trias2[j]),i,j) ) 
             end
         end
     end
@@ -58,8 +58,8 @@ function alg_bruteforce_bbox_threads(trias1, trias2)
         l_tid1 = l_tid2 = typemax(Int)
         for i in getrange(length(trias1))
             for j in 1:length(trias2)
-                if distance²(boxes1[i], boxes2[j]) < l_mindist
-                    l_mindist, l_tid1, l_tid2 = min( (l_mindist,l_tid1, l_tid2), (distance²(trias1[i],trias2[j]),i,j))
+                if AABB_distance²(boxes1[i], boxes2[j]) < l_mindist
+                    l_mindist, l_tid1, l_tid2 = min( (l_mindist,l_tid1, l_tid2), (triangle_distance²(trias1[i],trias2[j]),i,j))
                 end
             end
         end

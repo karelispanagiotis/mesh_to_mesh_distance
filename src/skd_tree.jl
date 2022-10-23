@@ -66,8 +66,8 @@ function nn_search(tree::sKDTree{V,Dim,T},
     
     if hi-lo+1 ≤ tree.leaf_size
         for i in lo:hi
-            if distance²(query_aabb, aabbs[indices[i]]) < min_dist²
-                min_dist², nn_id = min( (min_dist²,nn_id), (distance²(query, data[indices[i]]), indices[i]) )
+            if AABB_distance²(query_aabb, aabbs[indices[i]]) < min_dist²
+                min_dist², nn_id = min( (min_dist²,nn_id), (triangle_distance²(query, data[indices[i]]), indices[i]) )
             end
         end
         return min_dist², nn_id
@@ -76,8 +76,8 @@ function nn_search(tree::sKDTree{V,Dim,T},
     mid = (lo+hi)>>>1
     left, right  = v+1, v+2*(mid-lo+1)
     
-    left_dist  = distance²(query_aabb, nodes[left])
-    right_dist = distance²(query_aabb, nodes[right])
+    left_dist  = AABB_distance²(query_aabb, nodes[left])
+    right_dist = AABB_distance²(query_aabb, nodes[right])
     
     if left_dist < right_dist
         # Search in the left sub-tree
@@ -124,8 +124,8 @@ function nns_search(tree1::sKDTree{V, Dim, T},
     mid = (lo+hi)>>>1
     left, right  = v+1, v+2*(mid-lo+1)
 
-    left_dist  = distance²(nodes[left] , tree1.nodes[1])
-    right_dist = distance²(nodes[right], tree1.nodes[1])
+    left_dist  = AABB_distance²(nodes[left] , tree1.nodes[1])
+    right_dist = AABB_distance²(nodes[right], tree1.nodes[1])
 
     if left_dist < right_dist
         # Search in the left sub-tree

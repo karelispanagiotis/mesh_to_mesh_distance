@@ -1,9 +1,10 @@
 module PrimitiveDistances
 
-export distance²,
-       distance_endpoints, 
-       PQP_SegPoints,
-       PQP_TriDist
+export  AABB_distance²,
+        triangle_distance²,
+        distance_endpoints, 
+        PQP_SegPoints,
+        PQP_TriDist
 
 using Meshes, LinearAlgebra
 using StaticArrays
@@ -21,7 +22,7 @@ using EnhancedGJK
 # On fast computation of distance between line segments.
 # In Information Processing Letters, no. 21, pages 55-61, 1985
 #-------------------------------------------------------------------
-function distance²(AB::Segment{Dim,T}, CD::Segment{Dim,T}) where {Dim,T}
+function AABB_distance²(AB::Segment{Dim,T}, CD::Segment{Dim,T}) where {Dim,T}
     A, B = vertices(AB)
     C, D = vertices(CD)
 
@@ -104,7 +105,7 @@ function vectices_to_triangle_check(verts, t::Triangle{Dim,T}) where {Dim,T}
     return dist²
 end
 
-function distance²(T1::Triangle{Dim,T}, T2::Triangle{Dim,T}) where {Dim,T}
+function triangle_distance²(T1::Triangle{Dim,T}, T2::Triangle{Dim,T}) where {Dim,T}
     dist², = PQP_TriDist(T1, T2)
     return dist²
 end
@@ -114,7 +115,7 @@ end
 #
 # Returns the squared distance of two Axis-Aligned Bounding Boxes 
 #-------------------------------------------------------------------
-function distance²(B1::Box, B2::Box)
+function AABB_distance²(B1::Box, B2::Box)
     v = max.(minimum(B1) - maximum(B2), 0)
     w = max.(minimum(B2) - maximum(B1), 0)
     return v⋅v + w⋅w 
