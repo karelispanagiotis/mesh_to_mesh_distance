@@ -104,31 +104,8 @@ function vectices_to_triangle_check(verts, t::Triangle{Dim,T}) where {Dim,T}
     return dist²
 end
 
-#-------------------------------------------------------------------
-# Triangle to Triangle distance²()
-#
-# Returns the squared distance of two triangles
-# 
-# Checks all possible scenarios for the minimum distance:
-#   * The minimum distance is between two edges or
-#   * The minimum distance is between a vertex and a face or
-#   * The minimum distance is zero, because the triangles intersect
-#-------------------------------------------------------------------
 function distance²(T1::Triangle{Dim,T}, T2::Triangle{Dim,T}) where {Dim,T}
-    A, B, C = vertices(T1)
-    X, Y, Z = vertices(T2)
-    edges1 = (Segment(A,B), Segment(B,C), Segment(C,A))
-    edges2 = (Segment(X,Y), Segment(Y,Z), Segment(Z,X))
-    
-    dist² = typemax(T)
-    for seg₁ ∈ edges1
-        for seg₂ ∈ edges2
-            dist² = min(dist², distance²(seg₁, seg₂))
-        end
-    end
-    
-    dist² = min(dist², vectices_to_triangle_check(vertices(T1), T2))
-    dist² = min(dist², vectices_to_triangle_check(vertices(T2), T1))
+    dist², = PQP_TriDist(T1, T2)
     return dist²
 end
 
