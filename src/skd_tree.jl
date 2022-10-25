@@ -9,8 +9,9 @@ include("utilities.jl")
 include("primitive_distances.jl")
 
 using Meshes
-using .Utilities, .PrimitiveDistances
 using Base.Threads
+using .Utilities
+using .PrimitiveDistances
 
 struct sKDTree{V, Dim, T}
     data::Vector{V}

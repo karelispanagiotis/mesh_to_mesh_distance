@@ -7,8 +7,6 @@ export  AABB_distance²,
         PQP_TriDist
 
 using Meshes, LinearAlgebra
-using StaticArrays
-using EnhancedGJK
 
 #-------------------------------------------------------------------
 # Segment to Segment distance²

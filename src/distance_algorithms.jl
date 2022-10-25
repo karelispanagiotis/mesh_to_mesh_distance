@@ -9,7 +9,9 @@ export  alg_bruteforce,
 include("primitive_distances.jl")
 include("skd_tree.jl")
 using Meshes
-using Base.Threads, .PrimitiveDistances, .SKDTree
+using Base.Threads
+using .PrimitiveDistances
+using .SKDTree
 
 function getrange(N) 
     work = ceil(Int, N/nthreads())
