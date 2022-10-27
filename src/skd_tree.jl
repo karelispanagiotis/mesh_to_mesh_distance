@@ -43,7 +43,7 @@ function build_sKDTree(tree::sKDTree,
     left, right  = v+1, v+2*(mid-lo+1)
     if nthreads() ≥ 2^(depth-1)
         # Build in parallel
-        task = @spawn build_sKDTree(tree, left, lo, mid, depth+1, centroids)
+        task = Threads.@spawn build_sKDTree(tree, left, lo, mid, depth+1, centroids)
         build_sKDTree(tree, right, mid+1, hi , depth+1, centroids)
         wait(task)
     else 
