@@ -40,13 +40,6 @@ function alg_tree_queries(trias1, trias2)
     return mindist, tid1, tid2 
 end
 
-function alg_two_trees(trias1, trias2)
-    task = @spawn sKDTree(trias1)
-    tree2 = sKDTree(trias2)
-    tree1 = fetch(task)
-    return nearest_neighbours(tree1, tree2)
-end
-
 # primitive_distances.jl #
 function PQP_SegPoints(P::Point{Dim,Type}, A::Vec{Dim,Type},
                        Q::Point{Dim,Type}, B::Vec{Dim,Type} ) where {Dim,Type}
