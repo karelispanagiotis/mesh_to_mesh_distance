@@ -48,7 +48,6 @@ function alg_bruteforce_bbox(trias1, trias2)
 end
 
 function alg_bruteforce_bbox_threads(trias1, trias2)
-    
     boxes1 = boundingbox.(trias1)
     boxes2 = boundingbox.(trias2)
 
@@ -74,22 +73,18 @@ function alg_bruteforce_bbox_threads(trias1, trias2)
 end
 
 function alg_tree_queries(trias1, trias2)
+    if length(trias1) < length(trias2)
+        trias1, trias2 = trias2, trias1
+    end
     tree = sKDTree(trias1)
 
-    g_mindist = zeros(coordtype(eltype(trias1)), nthreads())
-    g_tid1 = zeros(Int, nthreads()) 
-    g_tid2 = zeros(Int, nthreads())
-    @threads for t in 1:nthreads()
-        mindist, id1, id2 = typemax(coordtype(eltype(trias1))), typemax(Int), typemax(Int)
-        for i in getrange(length(trias2))
-            (mindist, id1), id2 = min( ((mindist,id1),id2), (nearest_neighbour(tree,trias2[i]; radius²=mindist),i) )
-        end
-        g_mindist[threadid()] = mindist
-        g_tid1[threadid()] = id1
-        g_tid2[threadid()] = id2 
+    mindist = typemax(coordtype(eltype(trias1)))
+    tid1 = tid2 = typemax(Int)
+    for j in eachindex(trias2)  
+        tmp_dist, tmp_i = nearest_neighbour(tree, trias2[j]; radius²=mindist)
+        mindist,tid1,tid2 = min((mindist,tid1,tid2), (tmp_dist,tmp_i,j))
     end
-    i = argmin(g_mindist)
-    return g_mindist[i], g_tid1[i], g_tid2[i]
+    return mindist, tid1, tid2 
 end
 
 function alg_two_trees(trias1, trias2)
