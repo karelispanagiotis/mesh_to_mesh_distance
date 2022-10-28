@@ -93,8 +93,8 @@ function alg_tree_queries(trias1, trias2)
 end
 
 function alg_two_trees(trias1, trias2)
-    task = @spawn sKDTree(trias1)
-    tree2 = sKDTree(trias2)
+    task = Threads.@spawn sKDTree(trias1)
+    tree2 = sKDTree(trias2; leafsize=1)
     tree1 = fetch(task)
     return nearest_neighbours(tree1, tree2)
 end
