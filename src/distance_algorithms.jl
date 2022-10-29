@@ -78,6 +78,7 @@ function alg_tree_queries(trias1, trias2)
         trias1, trias2 = trias2, trias1 
     end
 
+    tree = sKDTree(trias1)
     g_mindist = zeros(coordtype(eltype(trias1)), nthreads())
     g_tid1 = zeros(Int, nthreads()) 
     g_tid2 = zeros(Int, nthreads())
