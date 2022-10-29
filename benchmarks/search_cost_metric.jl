@@ -408,32 +408,55 @@ function sKDTree(data::Vector{<:Geometry{Dim,T}}; leafsize::Int=ceil(Int,log2(le
 end
 
 # SCRIPT BEGINS HERE #
+
 using CSV 
 using DataFrames
 
+function measure_alg_tree_queries(trias1, trias2)
+    aabb_count[] = tria_count[] = 0
+    alg_tree_queries(trias1, trias2)
+    local_aabb_count = aabb_count[]
+    local_tria_count = tria_count[]
+    local_max_cost = local_aabb_count*aabb_cost + local_tria_count*triangle_cost
+
+    for i in 1:10 
+        aabb_count[] = tria_count[] = 0
+        shuffle!(trias1)
+        shuffle!(trias2)
+        alg_tree_queries(trias1, trias2)
+        if local_max_cost < aabb_count[]*aabb_cost + tria_count[]*triangle_cost 
+            local_aabb_count = aabb_count[]
+            local_tria_count = tria_count[]
+            local_max_cost = local_aabb_count*aabb_cost + local_tria_count*triangle_cost
+        end
+    end
+
+    aabb_count[] = local_aabb_count
+    tria_count[] = local_tria_count
+end
+
 global const aabb_count = Ref{Int64}(0)
 global const tria_count = Ref{Int64}(0)
-println("SCENE: ", ARGS[1])
+const triangle_cost = 385.7
+const aabb_cost = 23.5
 
-dir = ARGS[1]
-all_files = readdir(joinpath("testcases/", dir), join=true)
+directory = ARGS[1]
+directory = "scooby_w_bunny"
+all_files = readdir(joinpath("testcases/", directory), join=true)
 obj1_files = all_files[1:3]
 obj2_files = all_files[4:6]
 
-n1_triangles = Vector{Int32}(undef, 0)
-n2_triangles = Vector{Int32}(undef, 0)
+n1 = Vector{Int32}(undef, 0)
+n2 = Vector{Int32}(undef, 0)
 
-aabb_count_brut = Vector{Int64}(undef, 0)
-triangle_count_brut = Vector{Int64}(undef, 0)
+one_tree_aabb_count = Vector{Int64}(undef, 0)
+two_trees_aabb_count = Vector{Int64}(undef, 0)
 
-aabb_count_one_tree = Vector{Int64}(undef, 0)
-triangle_count_one_tree = Vector{Int64}(undef, 0)
+one_tree_tria_count = Vector{Int64}(undef, 0)
+two_trees_tria_count = Vector{Int64}(undef, 0)
 
-aabb_count_two_trees = Vector{Int64}(undef, 0)
-triangle_count_two_trees = Vector{Int64}(undef, 0)
-
-for i in 1:3 
-    for j in i:3 
+for i in 1:3
+    for j in 1:3
         mesh1 = load_mesh(obj1_files[i])
         mesh2 = load_mesh(obj2_files[j])
 
@@ -443,73 +466,30 @@ for i in 1:3
         shuffle!(trias1)
         shuffle!(trias2)
 
-        push!(n1_triangles, length(trias1))
-        push!(n2_triangles, length(trias2))
-        
-        # Brutefoce with AABBs
-        tria_count[] = aabb_count[] = 0
-        brut_res = -1.0f0
-        if length(trias1)*length(trias2) < 50000*50000
-            brut_res, = alg_bruteforce_bbox(trias1, trias2)
-        end
-        push!(aabb_count_brut, aabb_count[])
-        push!(triangle_count_brut, tria_count[]);
+        aabb_count[] = tria_count[] = 0 
+        measure_alg_tree_queries(trias1, trias2)
+        push!(one_tree_aabb_count, aabb_count[])
+        push!(one_tree_tria_count, tria_count[])
 
-        # Queries on Single Tree
-        tria_count[] = aabb_count[] = 0
-        one_tree_res, = alg_tree_queries(trias1, trias2)
-        push!(aabb_count_one_tree, aabb_count[])
-        push!(triangle_count_one_tree, tria_count[]);
-        
-        # Two Trees Queries 
-        tria_count[] = aabb_count[] = 0
-        two_trees_res, = alg_two_trees(trias1, trias2)
-        push!(aabb_count_two_trees, aabb_count[])
-        push!(triangle_count_two_trees, tria_count[]);
+        aabb_count[] = tria_count[] = 0
+        alg_two_trees(trias1, trias2)
+        push!(two_trees_aabb_count, aabb_count[])
+        push!(two_trees_tria_count, tria_count[])
 
-        if brut_res == -1.0f0
-            if one_tree_res ≈ two_trees_res 
-                println(one_tree_res)
-            else
-                println("Different Result: ", one_tree_res, " ", two_trees_res)
-            end
-        else 
-            if one_tree_res ≈ two_trees_res ≈ brut_res
-                println(one_tree_res)
-            else
-                println("Different Result: ", brut_res, " ", one_tree_res, " ", two_trees_res)
-            end 
-        end
+        push!(n1, length(trias1))
+        push!(n2, length(trias2))
     end
 end
-println(); println();
 
-n_total = n1_triangles .+ n2_triangles
-idx = sortperm(n_total)
-n_total = n_total[idx]
-n1_triangles = n1_triangles[idx]
-n2_triangles = n2_triangles[idx]
-aabb_count_brut = aabb_count_brut[idx]
-triangle_count_brut = triangle_count_brut[idx]
-aabb_count_one_tree = aabb_count_one_tree[idx]
-triangle_count_one_tree = triangle_count_one_tree[idx]
-aabb_count_two_trees = aabb_count_two_trees[idx]
-triangle_count_two_trees = triangle_count_two_trees[idx]
+n = n1 .+ n2 
+one_tree_cost = one_tree_aabb_count*aabb_cost .+ one_tree_tria_count*triangle_cost
+two_trees_cost = two_trees_aabb_count*aabb_cost .+ two_trees_tria_count*triangle_cost
 
-const triangle_cost = 385.7
-const aabb_cost = 23.5
+df = DataFrame(N = n, N1=n1, N2=n2, 
+            one_tree_aabbs=one_tree_aabb_count, one_tree_trias=one_tree_tria_count,
+            two_trees_aabbs=two_trees_aabb_count, two_trees_trias=two_trees_tria_count,
+            one_tree_tot_cost=one_tree_cost, two_trees_tot_cost=two_trees_cost)
 
-cost_brut = aabb_count_brut*aabb_cost .+ triangle_count_brut*triangle_cost
-cost_one_tree = aabb_count_one_tree*aabb_cost .+ triangle_count_one_tree*triangle_cost
-cost_two_trees = aabb_count_two_trees*aabb_cost .+ triangle_count_two_trees*triangle_cost
-
-df = DataFrame(N_total=n_total, N1=n1_triangles, N2=n2_triangles, 
-            brut_aabbs=aabb_count_brut, brut_trias=triangle_count_brut,
-            one_tree_aabbs=aabb_count_one_tree, one_tree_trias=triangle_count_one_tree,
-            two_trees_aabbs=aabb_count_two_trees, two_tress_trias=triangle_count_two_trees,
-            Cost_brut=cost_brut, 
-            Cost_one_tree=cost_one_tree, 
-            Cost_two_trees=cost_two_trees)
-
+sort!(df)
 filename = string(ARGS[1], "_cost_metric.csv")
-CSV.write(filename, df)
+CSV.write(filename ,df)
