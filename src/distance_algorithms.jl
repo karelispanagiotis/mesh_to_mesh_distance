@@ -74,7 +74,9 @@ function alg_bruteforce_bbox_threads(trias1, trias2)
 end
 
 function alg_tree_queries(trias1, trias2)
-    tree = sKDTree(trias1)
+    if length(trias1) < length(trias2)
+        trias1, trias2 = trias2, trias1 
+    end
 
     g_mindist = zeros(coordtype(eltype(trias1)), nthreads())
     g_tid1 = zeros(Int, nthreads()) 
