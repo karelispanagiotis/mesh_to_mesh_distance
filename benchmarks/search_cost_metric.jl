@@ -441,7 +441,6 @@ const triangle_cost = 385.7
 const aabb_cost = 23.5
 
 directory = ARGS[1]
-directory = "scooby_w_bunny"
 all_files = readdir(joinpath("testcases/", directory), join=true)
 obj1_files = all_files[1:3]
 obj2_files = all_files[4:6]
