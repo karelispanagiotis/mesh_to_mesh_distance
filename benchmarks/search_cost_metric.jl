@@ -29,7 +29,7 @@ function alg_tree_queries(trias1, trias2)
     if length(trias1) < length(trias2)
         trias1, trias2 = trias2, trias1
     end
-    tree = sKDTree(trias1; leafsize=1)
+    tree = sKDTree(trias1)
 
     mindist = typemax(coordtype(eltype(trias1)))
     tid1 = tid2 = typemax(Int)
@@ -41,8 +41,8 @@ function alg_tree_queries(trias1, trias2)
 end
 
 function alg_two_trees(trias1, trias2)
-    task = Threads.@spawn sKDTree(trias1; leafsize=1)
-    tree2 = sKDTree(trias2; leafsize=1)
+    task = Threads.@spawn sKDTree(trias1)
+    tree2 = sKDTree(trias2)
     tree1 = fetch(task)
     return nearest_neighbours(tree1, tree2)
 end
