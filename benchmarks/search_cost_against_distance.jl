@@ -424,38 +424,43 @@ const triangle_cost = 385.7
 const aabb_cost = 23.5
 
 
-bunny = load_mesh("testcases/bunny_distance.obj")
-scooby = load_mesh("testcases/scooby_distance.obj")
+mesh1 = load_mesh("testcases/airplanes/obj1_topairplane_highres.obj")
+mesh2 = load_mesh("testcases/airplanes/obj2_bottomairplane_highres.obj")
 
-dir = SVector(0,1,0)
+# dir = SVector(0,1,0)
+dir = SVector(0,0,5)
 
-bunny_aabb = boundingbox(bunny)
-const normalization_constant = norm(maximum(bunny_aabb) - minimum(bunny_aabb))
+mesh2_aabb = boundingbox(mesh2)
+const normalization_constant = norm(maximum(mesh2_aabb) - minimum(mesh2_aabb))
 
 dist = 0.0
 costs_one_tree = Vector{Float64}(undef, 0)
 costs_two_trees = Vector{Float64}(undef, 0)
 normal_distances = Vector{Float64}(undef, 0)
 while(dist/normalization_constant < 1000.0)
-    global bunny = apply_tranform(Translation(dir), bunny)
-    trias_bunny = collect(elements(bunny))
-    trias_scooby = collect(elements(scooby))
+    
+    trias1 = collect(elements(mesh1))
+    trias2 = collect(elements(mesh2))
 
-    shuffle!(trias_bunny)
-    shuffle!(trias_scooby)
+    shuffle!(trias1)
+    shuffle!(trias2)
 
     aabb_count[] = tria_count[] = 0    
-    alg_tree_queries(trias_scooby, trias_bunny)
+    alg_tree_queries(trias2, trias1)
     one_tree_cost = aabb_count[]*aabb_cost + tria_count[] * triangle_cost
 
     aabb_count[] = tria_count[] = 0    
-    alg_two_trees(trias_scooby, trias_bunny)
+    alg_two_trees(trias2, trias1)
     two_trees_cost = aabb_count[]*aabb_cost + tria_count[] * triangle_cost
 
-    global dist, = alg_tree_queries(trias_bunny, trias_scooby)
+    global dist, = alg_tree_queries(trias1, trias2)
+    dist = sqrt(dist)
+
     push!(normal_distances, dist/normalization_constant)
     push!(costs_one_tree, one_tree_cost)
     push!(costs_two_trees, two_trees_cost)
+    global dir *= 1.1
+    global mesh2 = apply_tranform(Translation(dir), mesh2)
 end
 
 df = DataFrame(NormDist=normal_distances, 
