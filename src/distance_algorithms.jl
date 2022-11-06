@@ -74,8 +74,10 @@ function alg_bruteforce_bbox_threads(trias1, trias2)
 end
 
 function alg_tree_queries(trias1, trias2)
+    swaped = false
     if length(trias1) < length(trias2)
-        trias1, trias2 = trias2, trias1 
+        trias1, trias2 = trias2, trias1
+        swaped = true 
     end
 
     tree = sKDTree(trias1)
@@ -92,6 +94,10 @@ function alg_tree_queries(trias1, trias2)
         g_tid2[threadid()] = id2 
     end
     i = argmin(g_mindist)
+
+    if swaped 
+        return g_mindist[i], g_tid2[i], g_tid1[i]
+    end 
     return g_mindist[i], g_tid1[i], g_tid2[i]
 end
 
