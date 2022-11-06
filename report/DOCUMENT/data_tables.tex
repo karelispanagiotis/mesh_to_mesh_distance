@@ -1,0 +1,132 @@
+\chapter{Πίνακες Αποτελεσμάτων}
+\label{apndx:table_results}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|r|c|c|c|}
+        \hline 
+        & Ανάλυση 1 & Ανάλυση 2 & Ανάλυση 3 \\
+        \hline
+        Αεροπλάνο & $25.7\times10^3$ & $384\times10^3$ & $1.52\times10^6$\\
+        \hline 
+        \tl{Scooby} & $3.6\times10^3$ & $19.8\times10^3$ & $136.4\times10^3$ \\
+        \hline
+        \tl{Stanford Bunny} & $3.1\times10^3$ & $16.6\times10^3$ & $114.5\times10^3$\\
+        \hline
+        Εσωτερικός Κύλινδρος & $72$ & $1.8\times10^3$ & $5.1\times10^3$ \\
+        \hline 
+        Εξωτερικός Κύλινδρος & $156$ & $3.6\times10^3$ & $10.2\times10^3$\\
+        \hline 
+        Τόρος & $155\times10^3$ & $348\times10^3$ & $613\times10^3$\\
+        \hline
+    \end{tabular}
+    \caption[]{Πλήθος τριγώνων του κάθε αντικειμένου για κάθε ανάλυση.}
+    \label{tab:objects_resolutions}
+\end{table}
+
+Στους παρακάτω πίνακες αναγράφεται το πλήθος των πράξεων που \tl{AABB-AABB} 
+και τρίγωνο-τρίγωνο που εκτελέστηκαν για κάθε σενάριο.
+Ο συμβολισμός \textbf{\tl{O.T.}} αναφέρεται στον 
+αλγόριθμο που χρησιμοποιεί ένα \tl{sKD-Tree (One Tree algorithm)}.
+O συμβολισμός \textbf{\tl{T.T.}} αναφέρεται στον 
+αλγόριθμο που χρησιμοποιεί δύο \tl{sKD-Tree (Two trees algorithm)}.
+
+\begin{table}[H]
+    \selectlanguage{english}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \bfseries N + M
+        & \bfseries O.T. AABB ops 
+        & \bfseries O.T. Triangle ops 
+        & \bfseries T.T. AABB ops
+        & \bfseries T.T. Triangle ops 
+        \csvreader[head to column names]
+        {../results/cost_metric/airplanes_cost_metric.csv}{}
+        {\\\hline \csvcoli &
+         \csvcolvi & \csvcolvii & \csvcolviii 
+         & \csvcolix} 
+         \\\hline
+    \end{tabular}
+    \selectlanguage{greek}  
+    \caption[]{Πλήθος πράξεων για τη σκηνή "αεροπλάνα"}
+\end{table}
+
+\begin{table}[H]
+    \selectlanguage{english}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \bfseries N + M
+        & \bfseries O.T. AABB ops 
+        & \bfseries O.T. Triangle ops 
+        & \bfseries T.T. AABB ops
+        & \bfseries T.T. Triangle ops 
+        \csvreader[head to column names]
+        {../results/cost_metric/scooby_w_bunny_cost_metric.csv}{}
+        {\\\hline \csvcoli &
+         \csvcolvi & \csvcolvii & \csvcolviii 
+         & \csvcolix} 
+         \\\hline
+    \end{tabular}
+    \selectlanguage{greek}  
+    \caption[]{Πλήθος πράξεων για τη σκηνή "\tl{Scooby} με \tl{Stanford Bunny}"}
+\end{table}
+
+\begin{table}[H]
+    \selectlanguage{english}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \bfseries N + M
+        & \bfseries O.T. AABB ops 
+        & \bfseries O.T. Triangle ops 
+        & \bfseries T.T. AABB ops
+        & \bfseries T.T. Triangle ops 
+        \csvreader[head to column names]
+        {../results/cost_metric/cylinders_cost_metric.csv}{}
+        {\\\hline \csvcoli &
+         \csvcolvi & \csvcolvii & \csvcolviii 
+         & \csvcolix} 
+         \\\hline
+    \end{tabular}
+    \selectlanguage{greek}  
+    \caption[]{Πλήθος πράξεων για τη σκηνή "Ομοαξονικοί Κύλινδροι"}
+\end{table}
+
+\begin{table}[H]
+    \selectlanguage{english}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \bfseries N + M
+        & \bfseries O.T. AABB ops 
+        & \bfseries O.T. Triangle ops 
+        & \bfseries T.T. AABB ops
+        & \bfseries T.T. Triangle ops 
+        \csvreader[head to column names]
+        {../results/cost_metric/chained_tori_cost_metric.csv}{}
+        {\\\hline \csvcoli &
+         \csvcolvi & \csvcolvii & \csvcolviii 
+         & \csvcolix} 
+         \\\hline
+    \end{tabular}
+    \selectlanguage{greek}  
+    \caption[]{Πλήθος πράξεων για τη σκηνή "Αλυσιδωτοί Τόροι"}
+\end{table}
+
+\begin{table}[H]
+    \selectlanguage{english}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \bfseries N + M
+        & \bfseries O.T. AABB ops 
+        & \bfseries O.T. Triangle ops 
+        & \bfseries T.T. AABB ops
+        & \bfseries T.T. Triangle ops 
+        \csvreader[head to column names]
+        {../results/cost_metric/colliding_tori_cost_metric.csv}{}
+        {\\\hline \csvcoli &
+         \csvcolvi & \csvcolvii & \csvcolviii 
+         & \csvcolix} 
+         \\\hline
+    \end{tabular}
+    \selectlanguage{greek}  
+    \caption[]{Πλήθος πράξεων για τη σκηνή "Συγκρουόμενοι Τόροι"}
+\end{table}
