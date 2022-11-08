@@ -211,7 +211,7 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{execution_times/cylinders_exec_time.pdf}
+    \includegraphics[width=1.0\textwidth]{execution_times/chained_tori_exec_time.pdf}
     \caption[Συνολικός Χρόνος Εκτέλεσης για "ομοαξονικοί κύλινδροι"] {
         Συνολικός χρόνος εκτέλεσης ερωτήματος απόστασης 
         για τη σκηνή "ομοαξονικοί κύλινδροι" συναρτήσει του μεγέθους των δύο μοντέλων.
@@ -281,7 +281,50 @@ $\frac{dist}{diagonal}$, όπου $dist$ η πραγματική
     \label{fig:search_time_vs_distance}
 \end{figure}
 
+\section{\tl{Profiling} Αλγορίθμων}
+Στα παρακάτω διαγράμματα παρουσιάζονται τα δύο στάδια των 
+αλγορίθμων, δηλαδή της προεπεξεργασίας και της αναζήτησης,
+ως ποσοστά του συνολικού χρόνου εκτέλεσης. 
+
+Τα πειράματα εκτελέστηκαν με τη μέγιστη ανάλυση 
+των αντικειμένων της κάθε σκηνής.
 
 
 
-% να προσθέσω ποσοστά χρόνου αναζήτησης/κατασκευής
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{time_percentages/airplanes_time_percentages.pdf}
+    \caption[Ποσοστά προεπεξεργασίας/αναζήτησης για τη σκηνή "αεροπλάνα"]
+    {Ποσοστό προεπεξεργασίας και αναζήτησης για τη σκηνή "αεροπλάνα"}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{time_percentages/scooby_w_bunny_time_percentages.pdf}
+    \caption[Ποσοστά προεπεξεργασίας/αναζήτησης για τη σκηνή "\tl{Scooby} με \tl{Stanford Bunny}"]
+    {Ποσοστό προεπεξεργασίας και αναζήτησης για τη σκηνή "\tl{Scooby} με \tl{Stanford Bunny}"}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{time_percentages/cylinders_time_percentages.pdf}
+    \caption[Ποσοστά προεπεξεργασίας/αναζήτησης για τη σκηνή "Ομοαξονικοί Κύλινδροι"]
+    {Ποσοστό προεπεξεργασίας και αναζήτησης για τη σκηνή "Ομοαξονικοί Κύλινδροι"}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{time_percentages/chained_tori_time_percentages.pdf}
+    \caption[Ποσοστά προεπεξεργασίας/αναζήτησης για τη σκηνή "Αλυσιδωτοί Τόροι"]
+    {Ποσοστό προεπεξεργασίας και αναζήτησης για τη σκηνή "Αλυσιδωτοί Τόροι"}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{time_percentages/colliding_tori_time_percentages.pdf}
+    \caption[Ποσοστά προεπεξεργασίας/αναζήτησης για τη σκηνή "Συγκρουόμενοι Τόροι"]
+    {Ποσοστό προεπεξεργασίας και αναζήτησης για τη σκηνή "Συγκρουόμενοι Τόροι"}
+\end{figure}
+
+
+
+
+
+
+
