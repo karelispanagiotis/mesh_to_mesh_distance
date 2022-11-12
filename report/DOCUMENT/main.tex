@@ -24,6 +24,7 @@
 \let\oldnl\nl% Store \nl in \oldnl
 \newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}% Remove line number for one line
 
+\addto\captionsgreek{\SetAlgorithmName{Algorithm}{Algorithm}{Κατάλογος Αλγορίθμων}}
 
 \graphicspath{{../graphics/}}
 
@@ -45,6 +46,8 @@
 \maketitle
 
 \tableofcontents
+\listoffigures
+\listofalgorithms
 \thispagestyle{empty}
 
 \include{chapter_introduction}
